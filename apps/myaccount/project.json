@@ -64,11 +64,6 @@
                         "glob": "**/*",
                         "input": "modules/i18n/dist/bundle",
                         "output": "resources/i18n"
-                    },
-                    {
-                        "glob": "**/auth.jsp",
-                        "input": "apps/console/src",
-                        "output": "."
                     }
                 ],
                 "styles": [],
