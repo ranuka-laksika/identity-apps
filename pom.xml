@@ -22,11 +22,11 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.identity.apps</groupId>
-    <artifactId>identity-apps-console</artifactId>
+    <artifactId>identity-apps-myaccount-parent</artifactId>
     <packaging>pom</packaging>
-    <version>2.80.7-SNAPSHOT</version>
-    <name>WSO2 Identity Server Console - Parent</name>
-    <description>WSO2 Identity Server Console Parent</description>
+    <version>2.25.14.1-SNAPSHOT</version>
+    <name>WSO2 Identity Server MyAccount - Parent</name>
+    <description>WSO2 Identity Server MyAccount Parent</description>
 
     <url>http://wso2.org</url>
 
@@ -37,15 +37,14 @@
     </parent>
 
     <scm>
-        <url>https://github.com/wso2/identity-apps.git</url>
-        <developerConnection>scm:git:https://github.com/wso2/identity-apps.git</developerConnection>
-        <connection>scm:git:https://github.com/wso2/identity-apps.git</connection>
-        <tag>HEAD</tag>
+        <url>https://github.com/wso2-support/identity-apps.git</url>
+        <developerConnection>scm:git:https://github.com/wso2-support/identity-apps.git</developerConnection>
+        <connection>scm:git:https://github.com/wso2-support/identity-apps.git</connection>
+        <tag>identity-apps-myaccount-2.15.14</tag>
     </scm>
 
     <modules>
-        <module>webapp</module>
-        <module>org.wso2.identity.apps.console.server.feature</module>
+        <module>apps/myaccount/java</module>
     </modules>
 
     <repositories>
@@ -192,7 +191,7 @@
 
             <dependency>
                 <groupId>org.wso2.identity.apps</groupId>
-                <artifactId>console</artifactId>
+                <artifactId>myaccount</artifactId>
                 <version>${project.version}</version>
                 <type>war</type>
             </dependency>
@@ -505,17 +504,6 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
                 <version>3.0.5</version>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.13</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>wso2.releases</serverId>
-                    <nexusUrl>https://maven.wso2.org/nexus</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
             </plugin>
         </plugins>
     </build>
