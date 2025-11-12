@@ -569,5 +569,6 @@
 
         <lint.exec.skip>true</lint.exec.skip>
         <bootstrap.exec.skip>false</bootstrap.exec.skip>
+        <project.scm.id>wso2-scm-server</project.scm.id>
     </properties>
 </project>
