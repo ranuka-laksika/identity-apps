@@ -21,6 +21,7 @@ import { AppConstants } from "@wso2is/admin.core.v1/constants/app-constants";
 import { UIConstants } from "@wso2is/admin.core.v1/constants/ui-constants";
 import { history } from "@wso2is/admin.core.v1/helpers/history";
 import { AppState } from "@wso2is/admin.core.v1/store";
+import { getApplicationDetails, getInboundProtocolConfig } from "@wso2is/admin.applications.v1/api/application";
 import { AGENT_USERSTORE_ID } from "@wso2is/admin.userstores.v1/constants/user-store-constants";
 import useUserStores from "@wso2is/admin.userstores.v1/hooks/use-user-stores";
 import { UserStoreListItem } from "@wso2is/admin.userstores.v1/models/user-stores";
@@ -45,6 +46,8 @@ export default function Agents ({
     "data-componentid": componentId
 }: AgentPageProps) {
     const [ newAgent, setNewAgent ] = useState<any>(null);
+    const [ fetchedApplicationClientId, setFetchedApplicationClientId ] = useState<string | null>(null);
+    const [ isFetchingClientId, setIsFetchingClientId ] = useState<boolean>(false);
 
     const dispatch: Dispatch = useDispatch();
 
@@ -92,6 +95,64 @@ export default function Agents ({
     const handleItemsPerPageDropdownChange = (event: React.MouseEvent<HTMLAnchorElement>, data: DropdownProps) => {
         setListItemLimit(data.value as number);
     };
+
+    /**
+     * Fetches the application client ID for a user-serving agent.
+     *
+     * @param agentUsername - The username of the agent
+     */
+    const fetchApplicationClientId = async (agentUsername: string): Promise<void> => {
+        try {
+            setIsFetchingClientId(true);
+
+            // Extract the application ID from the agent username
+            // Agent username: AGENT/uuid → Application ID: uuid
+            const applicationId: string = agentUsername.replace(/^AGENT\//i, "");
+
+            // Fetch the application directly by ID
+            const application: any = await getApplicationDetails(applicationId);
+            if (!application) {
+                dispatch(
+                    addAlert({
+                        description: `No application found with ID: ${applicationId}`,
+                        level: AlertLevels.WARNING,
+                        message: "Application not found"
+                    })
+                );
+                setFetchedApplicationClientId(null);
+
+                return;
+            }
+            // Fetch the OIDC configuration for the application
+            const oidcConfig: any = await getInboundProtocolConfig(application.id, "oidc");
+
+            if (oidcConfig?.clientId) {
+                setFetchedApplicationClientId(oidcConfig.clientId);
+            } else {
+                dispatch(
+                    addAlert({
+                        description: "OIDC configuration not found for the application",
+                        level: AlertLevels.WARNING,
+                        message: "Client ID not found"
+                    })
+                );
+                setFetchedApplicationClientId(null);
+            }
+        } catch (error) {
+            dispatch(
+                addAlert({
+                    description: "Failed to fetch application client ID",
+                    level: AlertLevels.ERROR,
+                    message: "Error fetching client ID"
+                })
+            );
+            setFetchedApplicationClientId(null);
+        } finally {
+            setIsFetchingClientId(false);
+        }
+    };
+
+
 
     return (
         <PageLayout
@@ -244,24 +305,46 @@ export default function Agents ({
                 />
             </ListLayout>) }
 
-            <AddAgentWizard
-                isOpen={ isAddAgentWizardOpen }
-                onClose={ (newCreatedAgent: any) => {
-                    if (newCreatedAgent) {
-                        setNewAgent(newCreatedAgent);
-                        setIsAgentCredentialWizardOpen(true);
-                    }
+            {isAddAgentWizardOpen && (
+                <AddAgentWizard
+                    isOpen={ isAddAgentWizardOpen }
+                    onClose={ (newCreatedAgent: any) => {
+                        // Close the wizard immediately to prevent flashing
+                        setIsAddAgentWizardOpen(false);
 
-                    setIsAddAgentWizardOpen(false);
-                } }
-            />
+                   if (newCreatedAgent) {
+                            setNewAgent(newCreatedAgent);
+
+                            // Open the credentials modal immediately for smooth UX
+                            setIsAgentCredentialWizardOpen(true);
+
+                            // If this is a user-serving agent, fetch the application client ID in the background
+                            if (newCreatedAgent.isUserServingAgent && newCreatedAgent.userName) {
+                                fetchApplicationClientId(newCreatedAgent.userName);
+                            } else {
+                                setFetchedApplicationClientId(null);
+                            }
+                        }
+                    } }
+                />
+            )}
 
             <AgentSecretShowModal
                 title={ t("agents:new.title") }
                 agentId={ newAgent?.id }
                 agentSecret={ newAgent?.password }
+                 // Use the fetched client ID from the OIDC endpoint instead of the SCIM response
+                applicationClientId={ fetchedApplicationClientId }
+                // Bug fix 2: The backend does NOT echo back IsUserServingAgent.
+                // The wizard now attaches the checkbox value directly to the response
+                // object before calling onClose, so we read it from newAgent.isUserServingAgent.
+                isUserServingAgent={ newAgent?.isUserServingAgent }
+                isFetchingClientId={ isFetchingClientId }
                 isOpen={ isAgentCredentialWizardOpen }
                 onClose={ () => {
+                    setIsAgentCredentialWizardOpen(false);
+                    setFetchedApplicationClientId(null);
+                    setIsFetchingClientId(false);
                     dispatch(
                         addAlert({
                             description: t("agents:new.alerts.success.description"),

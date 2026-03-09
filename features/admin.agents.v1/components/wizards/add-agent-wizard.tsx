@@ -20,7 +20,7 @@ import { AuthenticatedUserInfo } from "@asgardeo/auth-react";
 import { AppState } from "@wso2is/admin.core.v1/store";
 import { AlertLevels, IdentifiableComponentInterface } from "@wso2is/core/models";
 import { addAlert } from "@wso2is/core/store";
-import { FinalForm, FinalFormField, FormRenderProps, TextFieldAdapter } from "@wso2is/form/src";
+import { CheckboxFieldAdapter, FinalForm, FinalFormField, FormRenderProps, TextFieldAdapter } from "@wso2is/form/src";
 import { Button } from "@wso2is/react-components";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -56,6 +56,7 @@ export default function AddAgentWizard({
             closeOnEscape
         >
             <Modal.Header>New Agent</Modal.Header>
+
             <Modal.Content>
                 <FinalForm
                     onSubmit={ (values: any) => {
@@ -65,17 +66,20 @@ export default function AddAgentWizard({
 
                         setIsNewAgentFormSubmitting(true);
 
+                        const isUserServing: boolean = values?.isUserServingAgent || false;
+
                         const addAgentPayload: AgentScimSchema = {
                             "urn:scim:wso2:agent:schema": {
                                 Description: values?.description,
                                 DisplayName: values?.name,
+                                IsUserServingAgent: isUserServing,
                                 Owner: authenticatedUserInfo?.username
                             }
                         };
 
                         addAgent(addAgentPayload)
                             .then((response: AgentScimSchema) => {
-                                onClose(response);
+                                onClose({ ...response, isUserServingAgent: isUserServing });
                             })
                             .catch((_err: unknown) => {
                                 dispatch(
@@ -110,11 +114,18 @@ export default function AddAgentWizard({
                                     placeholder="Enter a description for the agent"
                                     component={ TextFieldAdapter }
                                 />
+                                <FinalFormField
+                                    name="isUserServingAgent"
+                                    label="Allow users to login to this agent"
+                                    component={ CheckboxFieldAdapter }
+                                    FormControlProps={ {
+                                        margin: "dense"
+                                    } }
+                                />
                             </form>
                         );
                     } }
                 />
-
             </Modal.Content>
 
             <Modal.Actions>

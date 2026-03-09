@@ -1,0 +1,64 @@
+{
+    "id": "agent-application",
+    "templateId": "agent-application",
+    "name": "Agent Application",
+    "description": "Application auto-created for AI agents using OAuth2 client credentials.",
+    "image": "m2m",
+    "authenticationProtocol": "oidc",
+    "category": "DEFAULT",
+    "displayOrder": -1,
+    "self": "",
+    "subTemplates": [],
+    "subTemplatesSectionTitle": "",
+    "templateGroup": "",
+    "types": [
+        "oauth2"
+    ],
+    "application": {
+        "name": "",
+        "advancedConfigurations": {
+            "discoverableByEndUsers": false,
+            "skipLogoutConsent": true,
+            "skipLoginConsent": true
+        },
+        "authenticationSequence": {
+            "type": "DEFAULT",
+            "steps": [
+                {
+                    "id": 1,
+                    "options": [
+                        {
+                            "idp": "LOCAL",
+                            "authenticator": "basic"
+                        }
+                    ]
+                }
+            ]
+        },
+        "inboundProtocolConfiguration": {
+            "oidc": {
+                "accessToken": {
+                    "applicationAccessTokenExpiryInSeconds": 3600,
+                    "bindingType": "none",
+                    "revokeTokensWhenIDPSessionTerminated": true,
+                    "type": "Default",
+                    "userAccessTokenExpiryInSeconds": 3600,
+                    "validateTokenBinding": false
+                },
+                "grantTypes": [
+                    "authorization_code",
+                    "refresh_token"
+                ],
+                "pkce": {
+                    "mandatory": true,
+                    "supportPlainTransformAlgorithm": false
+                },
+                "publicClient": false,
+                "refreshToken": {
+                    "expiryInSeconds": 86400,
+                    "renewRefreshToken": true
+                }
+            }
+        }
+    }
+}
