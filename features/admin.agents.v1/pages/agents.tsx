@@ -21,7 +21,7 @@ import { AppConstants } from "@wso2is/admin.core.v1/constants/app-constants";
 import { UIConstants } from "@wso2is/admin.core.v1/constants/ui-constants";
 import { history } from "@wso2is/admin.core.v1/helpers/history";
 import { AppState } from "@wso2is/admin.core.v1/store";
-import { getApplicationDetails, getInboundProtocolConfig } from "@wso2is/admin.applications.v1/api/application";
+import { getInboundProtocolConfig } from "@wso2is/admin.applications.v1/api/application";
 import { AGENT_USERSTORE_ID } from "@wso2is/admin.userstores.v1/constants/user-store-constants";
 import useUserStores from "@wso2is/admin.userstores.v1/hooks/use-user-stores";
 import { UserStoreListItem } from "@wso2is/admin.userstores.v1/models/user-stores";
@@ -109,22 +109,8 @@ export default function Agents ({
             // Agent username: AGENT/uuid → Application ID: uuid
             const applicationId: string = agentUsername.replace(/^AGENT\//i, "");
 
-            // Fetch the application directly by ID
-            const application: any = await getApplicationDetails(applicationId);
-            if (!application) {
-                dispatch(
-                    addAlert({
-                        description: `No application found with ID: ${applicationId}`,
-                        level: AlertLevels.WARNING,
-                        message: "Application not found"
-                    })
-                );
-                setFetchedApplicationClientId(null);
-
-                return;
-            }
             // Fetch the OIDC configuration for the application
-            const oidcConfig: any = await getInboundProtocolConfig(application.id, "oidc");
+            const oidcConfig: any = await getInboundProtocolConfig(applicationId, "oidc");
 
             if (oidcConfig?.clientId) {
                 setFetchedApplicationClientId(oidcConfig.clientId);
@@ -333,11 +319,7 @@ export default function Agents ({
                 title={ t("agents:new.title") }
                 agentId={ newAgent?.id }
                 agentSecret={ newAgent?.password }
-                 // Use the fetched client ID from the OIDC endpoint instead of the SCIM response
                 applicationClientId={ fetchedApplicationClientId }
-                // Bug fix 2: The backend does NOT echo back IsUserServingAgent.
-                // The wizard now attaches the checkbox value directly to the response
-                // object before calling onClose, so we read it from newAgent.isUserServingAgent.
                 isUserServingAgent={ newAgent?.isUserServingAgent }
                 isFetchingClientId={ isFetchingClientId }
                 isOpen={ isAgentCredentialWizardOpen }
