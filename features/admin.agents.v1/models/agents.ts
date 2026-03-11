@@ -23,11 +23,18 @@ export interface AddAgentInterface {
     url?: string;
     owner?: string;
 }
+export enum AgentType {
+    SYNCHRONOUS = "SYNCHRONOUS",
+    ASYNCHRONOUS = "ASYNCHRONOUS"
+}
+
 export interface AgentSchema {
     Url?: string;
     Description?: string;
     DisplayName?: string;
     IsUserServingAgent?: boolean;
+    AgentType?: AgentType;
+    CallbackUrl?: string;
     [key: string]: any;
 }
 

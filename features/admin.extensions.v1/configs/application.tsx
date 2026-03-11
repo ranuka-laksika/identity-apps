@@ -475,7 +475,8 @@ export const applicationConfig: ApplicationConfig = {
             ],
         [ "agent-application" ]: [
             ApplicationManagementConstants.AUTHORIZATION_CODE_GRANT,
-            ApplicationManagementConstants.REFRESH_TOKEN_GRANT
+            ApplicationManagementConstants.REFRESH_TOKEN_GRANT,
+            ApplicationManagementConstants.CIBA_GRANT
         ],
         [ "digital-wallet-application" ]: [
             ApplicationManagementConstants.AUTHORIZATION_CODE_GRANT,

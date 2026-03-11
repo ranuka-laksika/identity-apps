@@ -2,7 +2,7 @@
     "id": "agent-application",
     "templateId": "agent-application",
     "name": "Agent Application",
-    "description": "Application auto-created for AI agents using OAuth2 client credentials.",
+    "description": "Application auto-created for AI agents using OAuth2 authorization code flow.",
     "image": "m2m",
     "authenticationProtocol": "oidc",
     "category": "DEFAULT",
@@ -39,7 +39,7 @@
             "oidc": {
                 "accessToken": {
                     "applicationAccessTokenExpiryInSeconds": 3600,
-                    "bindingType": "none",
+                    "bindingType": "sso-session",
                     "revokeTokensWhenIDPSessionTerminated": true,
                     "type": "Default",
                     "userAccessTokenExpiryInSeconds": 3600,
@@ -47,17 +47,19 @@
                 },
                 "grantTypes": [
                     "authorization_code",
-                    "refresh_token"
+                    "refresh_token",
+                    "urn:openid:params:grant-type:ciba"
                 ],
                 "pkce": {
                     "mandatory": true,
                     "supportPlainTransformAlgorithm": false
                 },
-                "publicClient": false,
+                "publicClient": true,
                 "refreshToken": {
                     "expiryInSeconds": 86400,
                     "renewRefreshToken": true
-                }
+                },
+                "hybridFlowResponseType": "code_idtoken"
             }
         }
     }
