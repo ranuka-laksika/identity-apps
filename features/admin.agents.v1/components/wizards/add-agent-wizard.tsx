@@ -118,9 +118,8 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
             // If this is a user-serving agent, fetch the OAuth Client ID before showing success screen
             if (values?.isUserServingAgent && response?.userName) {
                 try {
-                    // Extract the application ID from the agent username
-                    // Agent username: AGENT/uuid → Application ID: uuid
-                    const applicationId: string = response.userName.replace(/^AGENT\//i, "");
+                    // Extract the application ID from response id (agentId == applicationId)
+                    const applicationId: string = response.id;
 
                     // Fetch the OIDC configuration for the application
                     const oidcConfig: any = await getInboundProtocolConfig(applicationId, "oidc");
