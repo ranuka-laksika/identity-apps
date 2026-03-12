@@ -17,15 +17,19 @@
  */
 
 import { AuthenticatedUserInfo } from "@asgardeo/auth-react";
+import { getInboundProtocolConfig } from "@wso2is/admin.applications.v1/api/application";
 import { ModalWithSidePanel } from "@wso2is/admin.core.v1/components/modals/modal-with-side-panel";
 import { AppState } from "@wso2is/admin.core.v1/store";
 import { AlertLevels, IdentifiableComponentInterface } from "@wso2is/core/models";
 import { addAlert } from "@wso2is/core/store";
-import { CheckboxFieldAdapter, FinalForm, FinalFormField, FormRenderProps, RadioGroupFieldAdapter, TextFieldAdapter } from "@wso2is/form/src";
-import { Button, Heading, Hint } from "@wso2is/react-components";
+import { URLUtils } from "@wso2is/core/utils";
+import { CheckboxFieldAdapter, CheckboxGroupFieldAdapter, FinalForm, FinalFormField, FormRenderProps, TextFieldAdapter } from "@wso2is/form/src";
+import { Button, CopyInputField, Heading, Hint } from "@wso2is/react-components";
 import React, { FunctionComponent, ReactElement, useState } from "react";
+import { Field } from "react-final-form";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
-import { Divider, Grid, Modal } from "semantic-ui-react";
+import { Divider, Form, Grid, Icon, Message, Radio } from "semantic-ui-react";
 import { addAgent } from "../../api/agents";
 import { AgentScimSchema, AgentType } from "../../models/agents";
 
@@ -34,17 +38,21 @@ interface AddAgentWizardPropsInterface extends IdentifiableComponentInterface {
     onClose: any;
 }
 
-enum WizardStep {
-    BASIC_INFO = 0,
-    AGENT_CONFIG = 1
-}
-
 interface FormValuesInterface {
     name?: string;
     description?: string;
     isUserServingAgent?: boolean;
     agentType?: AgentType;
     callbackUrl?: string;
+    cibaAuthReqExpiryTime?: number;
+    notificationChannels?: string[];
+}
+
+interface AgentCreationResultInterface {
+    agentId?: string;
+    agentSecret?: string;
+    oauthClientId?: string;
+    isUserServingAgent?: boolean;
 }
 
 const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
@@ -58,32 +66,20 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
 
     const dispatch: any = useDispatch();
     const authenticatedUserInfo: AuthenticatedUserInfo = useSelector((state: AppState) => state?.auth);
+    const { t } = useTranslation();
 
-    const [ currentStep, setCurrentStep ] = useState<WizardStep>(WizardStep.BASIC_INFO);
-    const [ formValues, setFormValues ] = useState<FormValuesInterface>({});
     const [ isSubmitting, setIsSubmitting ] = useState<boolean>(false);
+    const [ creationResult, setCreationResult ] = useState<AgentCreationResultInterface | null>(null);
+    const [ isShowingSuccessScreen, setIsShowingSuccessScreen ] = useState<boolean>(false);
+    const [ submittedValues, setSubmittedValues ] = useState<FormValuesInterface | null>(null);
 
-    const handleStepOneSubmit = (values: FormValuesInterface): void => {
-        setFormValues({ ...formValues, ...values });
-
-        if (values.isUserServingAgent) {
-            setCurrentStep(WizardStep.AGENT_CONFIG);
-        } else {
-            createAgent({ ...formValues, ...values });
-        }
-    };
-
-    const handleStepTwoSubmit = (values: FormValuesInterface): void => {
-        const finalValues: FormValuesInterface = { ...formValues, ...values };
-
-        createAgent(finalValues);
-    };
-
-    const createAgent = (values: FormValuesInterface): void => {
+    const handleFormSubmit = async (values: FormValuesInterface): Promise<void> => {
         if (!values?.name) {
             return;
         }
 
+        // Save the submitted values so the form can display them during loading
+        setSubmittedValues(values);
         setIsSubmitting(true);
 
         const addAgentPayload: AgentScimSchema = {
@@ -93,193 +89,267 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                 IsUserServingAgent: values?.isUserServingAgent || false,
                 AgentType: values?.agentType,
                 CallbackUrl: values?.callbackUrl,
+                CibaAuthReqExpiryTime: values?.cibaAuthReqExpiryTime,
+                NotificationChannels: Array.isArray(values?.notificationChannels)
+                    ? values.notificationChannels.join(",")
+                    : values?.notificationChannels,
                 Owner: authenticatedUserInfo?.username
             }
         };
 
-        addAgent(addAgentPayload)
-            .then((response: AgentScimSchema) => {
-                dispatch(
-                    addAlert({
-                        description: "Agent created successfully",
-                        level: AlertLevels.SUCCESS,
-                        message: "Success"
-                    })
-                );
-                onClose({ ...response, isUserServingAgent: values?.isUserServingAgent });
-            })
-            .catch((_err: unknown) => {
-                dispatch(
-                    addAlert({
-                        description: "Creating agent failed",
-                        level: AlertLevels.ERROR,
-                        message: "Something went wrong"
-                    })
-                );
-            })
-            .finally(() => {
-                setIsSubmitting(false);
-            });
-    };
+        try {
+            // Create the agent
+            const response: AgentScimSchema = await addAgent(addAgentPayload);
 
-    const handleBack = (): void => {
-        setCurrentStep(WizardStep.BASIC_INFO);
-    };
+            dispatch(
+                addAlert({
+                    description: "Agent created successfully",
+                    level: AlertLevels.SUCCESS,
+                    message: "Success"
+                })
+            );
 
-    const handleCancel = (): void => {
-        setCurrentStep(WizardStep.BASIC_INFO);
-        setFormValues({});
-        onClose(null);
-    };
+            const result: AgentCreationResultInterface = {
+                agentId: response?.userName,
+                agentSecret: response?.password,
+                oauthClientId: undefined,
+                isUserServingAgent: values?.isUserServingAgent || false
+            };
 
-    const renderStepOne = (): ReactElement => {
-        return (
-            <FinalForm
-                onSubmit={ handleStepOneSubmit }
-                initialValues={ formValues }
-                render={ ({ handleSubmit, values }: FormRenderProps) => {
-                    const showNextButton: boolean = values?.isUserServingAgent === true;
+            // If this is a user-serving agent, fetch the OAuth Client ID before showing success screen
+            if (values?.isUserServingAgent && response?.userName) {
+                try {
+                    // Extract the application ID from the agent username
+                    // Agent username: AGENT/uuid → Application ID: uuid
+                    const applicationId: string = response.userName.replace(/^AGENT\//i, "");
 
-                    return (
-                        <>
-                            <Modal.Content>
-                                <form id="addAgentForm-step1" onSubmit={ handleSubmit }>
-                                    <FinalFormField
-                                        name="name"
-                                        label="Name"
-                                        required={ true }
-                                        autoComplete="new-password"
-                                        component={ TextFieldAdapter }
-                                        data-componentid={ `${componentId}-name` }
-                                    />
-                                    <FinalFormField
-                                        label="Description (optional)"
-                                        name="description"
-                                        className="mt-3"
-                                        multiline
-                                        rows={ 4 }
-                                        maxRows={ 4 }
-                                        autoComplete="new-password"
-                                        placeholder="Enter a description for the agent"
-                                        component={ TextFieldAdapter }
-                                        data-componentid={ `${componentId}-description` }
-                                    />
-                                    <FinalFormField
-                                        name="isUserServingAgent"
-                                        label="Allow users to login to this agent"
-                                        component={ CheckboxFieldAdapter }
-                                        FormControlProps={ {
-                                            margin: "dense"
-                                        } }
-                                        data-componentid={ `${componentId}-user-serving-checkbox` }
-                                    />
-                                </form>
-                            </Modal.Content>
-                            <Modal.Actions>
-                                <Button
-                                    className="link-button"
-                                    basic
-                                    primary
-                                    onClick={ handleCancel }
-                                    data-testid={ `${componentId}-cancel-button` }
-                                >
-                                    Cancel
-                                </Button>
-                                {showNextButton ? (
-                                    <Button
-                                        primary={ true }
-                                        onClick={ () => {
-                                            document
-                                                .getElementById("addAgentForm-step1")
-                                                .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
-                                        } }
-                                        data-testid={ `${componentId}-next-button` }
-                                    >
-                                        Next
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        primary={ true }
-                                        disabled={ isSubmitting }
-                                        loading={ isSubmitting }
-                                        onClick={ () => {
-                                            document
-                                                .getElementById("addAgentForm-step1")
-                                                .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
-                                        } }
-                                        data-testid={ `${componentId}-create-button` }
-                                    >
-                                        Create
-                                    </Button>
-                                )}
-                            </Modal.Actions>
-                        </>
+                    // Fetch the OIDC configuration for the application
+                    const oidcConfig: any = await getInboundProtocolConfig(applicationId, "oidc");
+
+                    if (oidcConfig?.clientId) {
+                        result.oauthClientId = oidcConfig.clientId;
+                    }
+                } catch (error) {
+                    // Continue showing the result even if client ID fetch fails
+                    dispatch(
+                        addAlert({
+                            description: "Failed to fetch OAuth Client ID",
+                            level: AlertLevels.WARNING,
+                            message: "Client ID not available"
+                        })
                     );
-                } }
-            />
-        );
+                }
+            }
+
+            // Show success screen with all data ready
+            setCreationResult(result);
+            setIsShowingSuccessScreen(true);
+            setIsSubmitting(false);
+        } catch (_err: unknown) {
+            // On error, stay on form with the user's values
+            setIsShowingSuccessScreen(false);
+            setCreationResult(null);
+            setSubmittedValues(null);
+            dispatch(
+                addAlert({
+                    description: "Creating agent failed",
+                    level: AlertLevels.ERROR,
+                    message: "Something went wrong"
+                })
+            );
+            setIsSubmitting(false);
+        }
     };
 
-    const renderStepTwo = (): ReactElement => {
+    const handleClose = (): void => {
+        setIsShowingSuccessScreen(false);
+        setCreationResult(null);
+        setSubmittedValues(null);
+        onClose(creationResult);
+    };
+
+    const renderForm = (): ReactElement => {
         return (
             <FinalForm
-                onSubmit={ handleStepTwoSubmit }
-                initialValues={ formValues }
+                onSubmit={ handleFormSubmit }
+                initialValues={ submittedValues || {
+                    cibaAuthReqExpiryTime: 300,
+                    notificationChannels: [ "email", "sms" ]
+                } }
                 render={ ({ handleSubmit, values }: FormRenderProps) => {
+                    const isUserServingAgent: boolean = values?.isUserServingAgent === true;
                     const isSynchronous: boolean = values?.agentType === AgentType.SYNCHRONOUS;
+                    const isAsynchronous: boolean = values?.agentType === AgentType.ASYNCHRONOUS;
 
                     return (
                         <>
                             <ModalWithSidePanel.MainPanel>
                                 <ModalWithSidePanel.Header className="wizard-header">
-                                    Configure AI Agent
+                                    New Agent
                                     <Heading as="h6">
-                                        Configure authentication settings for your AI agent
+                                        Create a new AI agent with optional user authentication
                                     </Heading>
                                 </ModalWithSidePanel.Header>
                                 <ModalWithSidePanel.Content>
-                                    <form id="addAgentForm-step2" onSubmit={ handleSubmit }>
+                                    <form id="addAgentForm" onSubmit={ handleSubmit }>
                                         <FinalFormField
-                                            name="agentType"
-                                            label="AI Agent Type"
+                                            name="name"
+                                            label="Agent Name"
                                             required={ true }
-                                            component={ RadioGroupFieldAdapter }
-                                            options={ [
-                                                {
-                                                    label: "Synchronous AI Agent",
-                                                    value: AgentType.SYNCHRONOUS
-                                                },
-                                                {
-                                                    label: "Asynchronous AI Agent",
-                                                    value: AgentType.ASYNCHRONOUS
-                                                }
-                                            ] }
-                                            data-componentid={ `${componentId}-agent-type` }
+                                            placeholder="Enter agent name"
+                                            autoComplete="new-password"
+                                            component={ TextFieldAdapter }
+                                            disabled={ isSubmitting }
+                                            validate={ (value: string) => !value ? "Agent name is required" : undefined }
+                                            data-componentid={ `${componentId}-name` }
+                                        />
+                                        <FinalFormField
+                                            label="Description (optional)"
+                                            name="description"
+                                            className="mt-3"
+                                            multiline
+                                            rows={ 4 }
+                                            maxRows={ 4 }
+                                            autoComplete="new-password"
+                                            placeholder="Enter a description for the agent"
+                                            component={ TextFieldAdapter }
+                                            disabled={ isSubmitting }
+                                            data-componentid={ `${componentId}-description` }
                                         />
 
-                                        {isSynchronous && (
-                                            <>
-                                                <Divider hidden style={ { margin: "1rem 0" } } />
-                                                <FinalFormField
-                                                    name="callbackUrl"
-                                                    label="Callback URL"
-                                                    required={ true }
-                                                    placeholder="https://myapp.io/callback"
-                                                    autoComplete="new-password"
-                                                    component={ TextFieldAdapter }
-                                                    helperText="The URL to which the authorization code will be sent"
-                                                    data-componentid={ `${componentId}-callback-url` }
-                                                />
-                                            </>
-                                        )}
+                                        <Divider hidden style={ { margin: "1.5rem 0" } } />
 
-                                        {!isSynchronous && values?.agentType && (
+                                        <FinalFormField
+                                            name="isUserServingAgent"
+                                            label="Allow users to login to this agent"
+                                            component={ CheckboxFieldAdapter }
+                                            disabled={ isSubmitting }
+                                            FormControlProps={ {
+                                                margin: "dense"
+                                            } }
+                                            data-componentid={ `${componentId}-user-serving-checkbox` }
+                                        />
+
+                                        {isUserServingAgent && (
                                             <>
-                                                <Divider hidden style={ { margin: "1rem 0" } } />
-                                                <Hint>
-                                                    This agent will use CIBA (Client Initiated Backchannel
-                                                    Authentication) for user authentication. No callback URL is required.
-                                                </Hint>
+                                                <Divider hidden style={ { margin: "1.5rem 0" } } />
+
+                                                <Field
+                                                    name="agentType"
+                                                    validate={ (value: string) => {
+                                                        if (isUserServingAgent && !value) {
+                                                            return "Please select an Agent Type";
+                                                        }
+                                                        return undefined;
+                                                    } }
+                                                >
+                                                    {({ input, meta }) => (
+                                                        <div style={ { marginBottom: "1rem" } }>
+                                                            <label className="MuiFormLabel-root">
+                                                                Agent Type <span style={ { color: "#f44336" } }>*</span>
+                                                            </label>
+
+                                                            <Form.Field>
+                                                                <Radio
+                                                                    label="Synchronous Agent"
+                                                                    name="agentType"
+                                                                    value={ AgentType.SYNCHRONOUS }
+                                                                    checked={ input.value === AgentType.SYNCHRONOUS }
+                                                                    onChange={ () => input.onChange(AgentType.SYNCHRONOUS) }
+                                                                    disabled={ isSubmitting }
+                                                                    data-componentid={ `${componentId}-agent-type-sync` }
+                                                                />
+                                                            </Form.Field>
+
+                                                            {isSynchronous && (
+                                                                <div style={ { marginLeft: "2rem", marginTop: "1rem", marginBottom: "1rem" } }>
+                                                                    <FinalFormField
+                                                                        name="callbackUrl"
+                                                                        label="Callback URL"
+                                                                        required={ true }
+                                                                        placeholder="https://myapp.io/callback"
+                                                                        autoComplete="new-password"
+                                                                        component={ TextFieldAdapter }
+                                                                        disabled={ isSubmitting }
+                                                                        validate={ (value: string) => {
+                                                                            if (!value) {
+                                                                                return "Callback URL is required";
+                                                                            }
+                                                                            if (URLUtils.isURLValid(value)) {
+                                                                                if (URLUtils.isHttpUrl(value, false) || URLUtils.isHttpsUrl(value, false)) {
+                                                                                    return undefined;
+                                                                                }
+                                                                            }
+                                                                            return t("applications:forms.inboundOIDC.fields.callBackUrls.validations.invalid");
+                                                                        } }
+                                                                        helperText="The URL to which the authorization code will be sent after user authentication"
+                                                                        data-componentid={ `${componentId}-callback-url` }
+                                                                    />
+                                                                </div>
+                                                            )}
+
+                                                            <Form.Field>
+                                                                <Radio
+                                                                    label="Asynchronous Agent"
+                                                                    name="agentType"
+                                                                    value={ AgentType.ASYNCHRONOUS }
+                                                                    checked={ input.value === AgentType.ASYNCHRONOUS }
+                                                                    onChange={ () => input.onChange(AgentType.ASYNCHRONOUS) }
+                                                                    disabled={ isSubmitting }
+                                                                    data-componentid={ `${componentId}-agent-type-async` }
+                                                                />
+                                                            </Form.Field>
+
+                                                            {meta.touched && meta.error && (
+                                                                <div style={ {
+                                                                    color: "#f44336",
+                                                                    fontSize: "0.75rem",
+                                                                    marginTop: "0.5rem"
+                                                                } }>
+                                                                    { meta.error }
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </Field>
+
+                                                {isAsynchronous && (
+                                                    <div style={ { marginLeft: "2rem", marginTop: "1rem" } }>
+                                                        <FinalFormField
+                                                            name="cibaAuthReqExpiryTime"
+                                                            label="CIBA Authentication Request Expiry Time (seconds)"
+                                                            required={ true }
+                                                            type="number"
+                                                            placeholder="300"
+                                                            autoComplete="new-password"
+                                                            component={ TextFieldAdapter }
+                                                            disabled={ isSubmitting }
+                                                            helperText="Specify the expiry time for the CIBA authentication request"
+                                                            data-componentid={ `${componentId}-ciba-expiry-time` }
+                                                        />
+
+                                                        <Divider hidden style={ { margin: "1rem 0" } } />
+
+                                                        <FinalFormField
+                                                            name="notificationChannels"
+                                                            label="Notification Delivery Method"
+                                                            component={ CheckboxGroupFieldAdapter }
+                                                            disabled={ isSubmitting }
+                                                            hint="Configure which notification methods this application supports"
+                                                            options={ [
+                                                                {
+                                                                    label: "Email",
+                                                                    value: "email"
+                                                                },
+                                                                {
+                                                                    label: "SMS",
+                                                                    value: "sms"
+                                                                }
+                                                            ] }
+                                                            data-componentid={ `${componentId}-notification-channels` }
+                                                        />
+                                                    </div>
+                                                )}
                                             </>
                                         )}
                                     </form>
@@ -291,10 +361,10 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                                                 <Button
                                                     className="link-button"
                                                     basic
-                                                    onClick={ handleBack }
-                                                    data-testid={ `${componentId}-back-button` }
+                                                    onClick={ handleClose }
+                                                    data-testid={ `${componentId}-cancel-button` }
                                                 >
-                                                    Back
+                                                    Cancel
                                                 </Button>
                                             </Grid.Column>
                                             <Grid.Column mobile={ 8 } tablet={ 8 } computer={ 8 }>
@@ -305,7 +375,7 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                                                     floated="right"
                                                     onClick={ () => {
                                                         document
-                                                            .getElementById("addAgentForm-step2")
+                                                            .getElementById("addAgentForm")
                                                             .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
                                                     } }
                                                     data-testid={ `${componentId}-create-button` }
@@ -324,45 +394,59 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                                     </div>
                                 </ModalWithSidePanel.Header>
                                 <ModalWithSidePanel.Content>
-                                    <Heading as="h5">AI Agent Type</Heading>
-                                    <p>Choose how your agent will interact with users and handle authentication.</p>
+                                    <Heading as="h6">Agent Name</Heading>
+                                    <p>The name used for your agent.</p>
 
                                     <Divider />
 
-                                    <Heading as="h6">Synchronous AI Agent</Heading>
-                                    <p>
-                                        Provides <strong>real-time responses</strong> using OAuth 2.0 authorization code flow.
-                                    </p>
-                                    <p style={ { fontSize: "0.9em", color: "#767676" } }>
-                                        <strong>Use Cases:</strong> Chatbots, real-time assistants, customer support
-                                    </p>
-                                    <p style={ { fontSize: "0.9em", color: "#767676" } }>
-                                        <strong>Requires:</strong> Callback URL for authorization code
-                                    </p>
+                                    <Heading as="h6">Description</Heading>
+                                    <p>A brief description of what your agent does.</p>
 
                                     <Divider />
 
-                                    <Heading as="h6">Asynchronous AI Agent</Heading>
+                                    <Heading as="h6">Allow Users to Login</Heading>
                                     <p>
-                                        Handles longer processes using <strong>CIBA</strong> (Client Initiated Backchannel Authentication).
-                                    </p>
-                                    <p style={ { fontSize: "0.9em", color: "#767676" } }>
-                                        <strong>Use Cases:</strong> Task automation, workflow initiators, scheduled operations
-                                    </p>
-                                    <p style={ { fontSize: "0.9em", color: "#767676" } }>
-                                        <strong>Authentication:</strong> CIBA grant with POLL mode - agent polls for authentication result
+                                        Enable this option if your agent needs users to login to the agent to access
+                                        user specific resources on behalf of the user. This will create an OAuth2/OIDC
+                                        application for the agent.
                                     </p>
 
-                                    {isSynchronous && (
+                                    {isUserServingAgent && (
                                         <>
                                             <Divider />
-                                            <Heading as="h6">Callback URL</Heading>
+
+                                            <Heading as="h5">Agent Type</Heading>
+                                            <p>Choose how your agent will interact with users and handle authentication.</p>
+
+                                            <Divider />
+
+                                            <Heading as="h6">Synchronous Agent</Heading>
                                             <p>
-                                                The redirect URI where the authorization code is sent after authentication.
+                                                An agent that works in real time, where the user provides inputs or questions,
+                                                and the agent immediately responds and takes action based on what the user said -
+                                                requiring the user to be actively present to guide the interaction forward.
                                             </p>
-                                            <Hint compact>
-                                                E.g., https://myapp.io/callback
-                                            </Hint>
+
+                                            <Divider />
+
+                                            <Heading as="h6">Asynchronous Agent</Heading>
+                                            <p>
+                                                An agent that operates independently in the background, executing tasks and workflows
+                                                without requiring continuous user presence, only engaging with the user when necessary.
+                                            </p>
+
+                                            {isSynchronous && (
+                                                <>
+                                                    <Divider />
+                                                    <Heading as="h6">Callback URL</Heading>
+                                                    <p>
+                                                        The redirect URI where the authorization code is sent after user authentication.
+                                                    </p>
+                                                    <Hint compact>
+                                                        E.g., https://myapp.io/callback
+                                                    </Hint>
+                                                </>
+                                            )}
                                         </>
                                     )}
                                 </ModalWithSidePanel.Content>
@@ -374,37 +458,127 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
         );
     };
 
-    if (currentStep === WizardStep.AGENT_CONFIG) {
+    const renderSuccessScreen = (): ReactElement => {
         return (
-            <ModalWithSidePanel
-                open={ isOpen }
-                className="wizard minimal-application-create-wizard"
-                dimmer="blurring"
-                onClose={ handleCancel }
-                closeOnDimmerClick={ false }
-                closeOnEscape
-                data-componentid={ `${componentId}-modal-step2` }
-            >
-                {renderStepTwo()}
-            </ModalWithSidePanel>
+            <>
+                <ModalWithSidePanel.MainPanel>
+                    <ModalWithSidePanel.Header className="wizard-header">
+                        Agent Created Successfully
+                        <Heading as="h6">
+                            Your agent has been created. Please save the credentials below.
+                        </Heading>
+                    </ModalWithSidePanel.Header>
+                    <ModalWithSidePanel.Content>
+                        <Heading as="h6">Agent ID</Heading>
+                        <CopyInputField
+                            value={ creationResult?.agentId || "" }
+                            data-componentid={ `${componentId}-agent-id-copy` }
+                        />
+
+                        <Divider hidden />
+
+                        <Message warning>
+                            <div style={ { display: "flex", alignItems: "center", gap: "0.5rem" } }>
+                                <Icon name="warning sign" />
+                                <span>
+                                    Make sure to copy your agent secret now as you will not be able to see this again.
+                                </span>
+                            </div>
+                        </Message>
+
+                        <Heading as="h6">Agent Secret</Heading>
+                        <CopyInputField
+                            value={ creationResult?.agentSecret || "" }
+                            secret
+                            data-componentid={ `${componentId}-agent-secret-copy` }
+                        />
+
+                        {creationResult?.isUserServingAgent && (
+                            <>
+                                <Divider hidden />
+
+                                <Heading as="h6">OAuth Client ID</Heading>
+                                {creationResult?.oauthClientId ? (
+                                    <CopyInputField
+                                        value={ creationResult?.oauthClientId }
+                                        data-componentid={ `${componentId}-client-id-copy` }
+                                    />
+                                ) : (
+                                    <Hint>OAuth Client ID not available</Hint>
+                                )}
+                            </>
+                        )}
+                    </ModalWithSidePanel.Content>
+                    <ModalWithSidePanel.Actions>
+                        <Grid>
+                            <Grid.Row column={ 1 }>
+                                <Grid.Column mobile={ 16 } tablet={ 16 } computer={ 16 }>
+                                    <Button
+                                        primary={ true }
+                                        floated="right"
+                                        onClick={ handleClose }
+                                        data-testid={ `${componentId}-done-button` }
+                                    >
+                                        Done
+                                    </Button>
+                                </Grid.Column>
+                            </Grid.Row>
+                        </Grid>
+                    </ModalWithSidePanel.Actions>
+                </ModalWithSidePanel.MainPanel>
+                <ModalWithSidePanel.SidePanel>
+                    <ModalWithSidePanel.Header className="wizard-header help-panel-header muted">
+                        <div className="help-panel-header-text">
+                            Help
+                        </div>
+                    </ModalWithSidePanel.Header>
+                    <ModalWithSidePanel.Content>
+                        <Heading as="h5">Important: Save Your Credentials</Heading>
+                        <p>
+                            Make sure to copy and store these credentials in a secure location.
+                            The agent secret cannot be retrieved again after closing this dialog.
+                        </p>
+
+                        <Divider />
+
+                        <Heading as="h6">Agent ID</Heading>
+                        <p>
+                            The unique identifier for your agent. Use this to reference the agent in your application.
+                        </p>
+
+                        <Divider />
+
+                        <Heading as="h6">Agent Secret</Heading>
+                        <p>
+                            The password for your agent. Keep this secure and never share it publicly.
+                        </p>
+
+                        <Divider />
+
+                        <Heading as="h6">OAuth Client ID</Heading>
+                        <p>
+                            The OAuth 2.0 client identifier for your agent application.
+                            Use this for OAuth authentication flows. This is only available
+                            if you enabled "Allow users to login to this agent".
+                        </p>
+                    </ModalWithSidePanel.Content>
+                </ModalWithSidePanel.SidePanel>
+            </>
         );
-    }
+    };
 
     return (
-        <Modal
-            data-testid={ componentId }
-            data-componentid={ componentId }
+        <ModalWithSidePanel
             open={ isOpen }
-            className="wizard"
+            className="wizard minimal-application-create-wizard"
             dimmer="blurring"
-            size="tiny"
-            onClose={ handleCancel }
+            onClose={ handleClose }
             closeOnDimmerClick={ false }
             closeOnEscape
+            data-componentid={ `${componentId}-modal` }
         >
-            <Modal.Header>New Agent</Modal.Header>
-            {renderStepOne()}
-        </Modal>
+            {isShowingSuccessScreen ? renderSuccessScreen() : renderForm()}
+        </ModalWithSidePanel>
     );
 };
 

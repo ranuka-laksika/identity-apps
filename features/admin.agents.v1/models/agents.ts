@@ -35,6 +35,8 @@ export interface AgentSchema {
     IsUserServingAgent?: boolean;
     AgentType?: AgentType;
     CallbackUrl?: string;
+    CibaAuthReqExpiryTime?: number;
+    NotificationChannels?: string;
     [key: string]: any;
 }
 
