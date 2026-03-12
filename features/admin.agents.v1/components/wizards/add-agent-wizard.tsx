@@ -103,9 +103,9 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
 
             dispatch(
                 addAlert({
-                    description: "Agent created successfully",
+                    description: t("agents:wizard.alerts.created.description"),
                     level: AlertLevels.SUCCESS,
-                    message: "Success"
+                    message: t("agents:wizard.alerts.created.message")
                 })
             );
 
@@ -133,9 +133,9 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                     // Continue showing the result even if client ID fetch fails
                     dispatch(
                         addAlert({
-                            description: "Failed to fetch OAuth Client ID",
+                            description: t("agents:wizard.alerts.clientIdFetchFailed.description"),
                             level: AlertLevels.WARNING,
-                            message: "Client ID not available"
+                            message: t("agents:wizard.alerts.clientIdFetchFailed.message")
                         })
                     );
                 }
@@ -152,9 +152,9 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
             setSubmittedValues(null);
             dispatch(
                 addAlert({
-                    description: "Creating agent failed",
+                    description: t("agents:wizard.alerts.error.description"),
                     level: AlertLevels.ERROR,
-                    message: "Something went wrong"
+                    message: t("agents:wizard.alerts.error.message")
                 })
             );
             setIsSubmitting(false);
@@ -185,33 +185,33 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                         <>
                             <ModalWithSidePanel.MainPanel>
                                 <ModalWithSidePanel.Header className="wizard-header">
-                                    New Agent
+                                    { t("agents:wizard.title") }
                                     <Heading as="h6">
-                                        Create a new AI agent with optional user authentication
+                                        { t("agents:wizard.subtitle") }
                                     </Heading>
                                 </ModalWithSidePanel.Header>
                                 <ModalWithSidePanel.Content>
                                     <form id="addAgentForm" onSubmit={ handleSubmit }>
                                         <FinalFormField
                                             name="name"
-                                            label="Agent Name"
+                                            label={ t("agents:wizard.fields.name.label") }
                                             required={ true }
-                                            placeholder="Enter agent name"
+                                            placeholder={ t("agents:wizard.fields.name.placeholder") }
                                             autoComplete="new-password"
                                             component={ TextFieldAdapter }
                                             disabled={ isSubmitting }
-                                            validate={ (value: string) => !value ? "Agent name is required" : undefined }
+                                            validate={ (value: string) => !value ? t("agents:wizard.fields.name.validations.required") : undefined }
                                             data-componentid={ `${componentId}-name` }
                                         />
                                         <FinalFormField
-                                            label="Description (optional)"
+                                            label={ t("agents:wizard.fields.description.label") }
                                             name="description"
                                             className="mt-3"
                                             multiline
                                             rows={ 4 }
                                             maxRows={ 4 }
                                             autoComplete="new-password"
-                                            placeholder="Enter a description for the agent"
+                                            placeholder={ t("agents:wizard.fields.description.placeholder") }
                                             component={ TextFieldAdapter }
                                             disabled={ isSubmitting }
                                             data-componentid={ `${componentId}-description` }
@@ -221,7 +221,7 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
 
                                         <FinalFormField
                                             name="isUserServingAgent"
-                                            label="Allow users to login to this agent"
+                                            label={ t("agents:wizard.fields.isUserServingAgent.label") }
                                             component={ CheckboxFieldAdapter }
                                             disabled={ isSubmitting }
                                             FormControlProps={ {
@@ -238,7 +238,7 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                                                     name="agentType"
                                                     validate={ (value: string) => {
                                                         if (isUserServingAgent && !value) {
-                                                            return "Please select an Agent Type";
+                                                            return t("agents:wizard.fields.agentType.validations.required");
                                                         }
                                                         return undefined;
                                                     } }
@@ -246,12 +246,12 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                                                     {({ input, meta }) => (
                                                         <div style={ { marginBottom: "1rem" } }>
                                                             <label className="MuiFormLabel-root">
-                                                                Agent Type <span style={ { color: "#f44336" } }>*</span>
+                                                                { t("agents:wizard.fields.agentType.label") } <span style={ { color: "#f44336" } }>*</span>
                                                             </label>
 
                                                             <Form.Field>
                                                                 <Radio
-                                                                    label="Synchronous Agent"
+                                                                    label={ t("agents:wizard.fields.agentType.options.synchronous.label") }
                                                                     name="agentType"
                                                                     value={ AgentType.SYNCHRONOUS }
                                                                     checked={ input.value === AgentType.SYNCHRONOUS }
@@ -265,15 +265,15 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                                                                 <div style={ { marginLeft: "2rem", marginTop: "1rem", marginBottom: "1rem" } }>
                                                                     <FinalFormField
                                                                         name="callbackUrl"
-                                                                        label="Callback URL"
+                                                                        label={ t("agents:wizard.fields.callbackUrl.label") }
                                                                         required={ true }
-                                                                        placeholder="https://myapp.io/callback"
+                                                                        placeholder={ t("agents:wizard.fields.callbackUrl.placeholder") }
                                                                         autoComplete="new-password"
                                                                         component={ TextFieldAdapter }
                                                                         disabled={ isSubmitting }
                                                                         validate={ (value: string) => {
                                                                             if (!value) {
-                                                                                return "Callback URL is required";
+                                                                                return t("agents:wizard.fields.callbackUrl.label") + " is required";
                                                                             }
                                                                             if (URLUtils.isURLValid(value)) {
                                                                                 if (URLUtils.isHttpUrl(value, false) || URLUtils.isHttpsUrl(value, false)) {
@@ -282,7 +282,7 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                                                                             }
                                                                             return t("applications:forms.inboundOIDC.fields.callBackUrls.validations.invalid");
                                                                         } }
-                                                                        helperText="The URL to which the authorization code will be sent after user authentication"
+                                                                        helperText={ t("agents:wizard.fields.callbackUrl.helperText") }
                                                                         data-componentid={ `${componentId}-callback-url` }
                                                                     />
                                                                 </div>
@@ -290,7 +290,7 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
 
                                                             <Form.Field>
                                                                 <Radio
-                                                                    label="Asynchronous Agent"
+                                                                    label={ t("agents:wizard.fields.agentType.options.asynchronous.label") }
                                                                     name="agentType"
                                                                     value={ AgentType.ASYNCHRONOUS }
                                                                     checked={ input.value === AgentType.ASYNCHRONOUS }
@@ -317,14 +317,14 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                                                     <div style={ { marginLeft: "2rem", marginTop: "1rem" } }>
                                                         <FinalFormField
                                                             name="cibaAuthReqExpiryTime"
-                                                            label="CIBA Authentication Request Expiry Time (seconds)"
+                                                            label={ t("agents:wizard.fields.cibaAuthReqExpiryTime.label") }
                                                             required={ true }
                                                             type="number"
-                                                            placeholder="300"
+                                                            placeholder={ t("agents:wizard.fields.cibaAuthReqExpiryTime.placeholder") }
                                                             autoComplete="new-password"
                                                             component={ TextFieldAdapter }
                                                             disabled={ isSubmitting }
-                                                            helperText="Specify the expiry time for the CIBA authentication request"
+                                                            helperText={ t("agents:wizard.fields.cibaAuthReqExpiryTime.helperText") }
                                                             data-componentid={ `${componentId}-ciba-expiry-time` }
                                                         />
 
@@ -332,17 +332,17 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
 
                                                         <FinalFormField
                                                             name="notificationChannels"
-                                                            label="Notification Delivery Method"
+                                                            label={ t("agents:wizard.fields.notificationChannels.label") }
                                                             component={ CheckboxGroupFieldAdapter }
                                                             disabled={ isSubmitting }
-                                                            hint="Configure which notification methods this application supports"
+                                                            hint={ t("agents:wizard.fields.notificationChannels.hint") }
                                                             options={ [
                                                                 {
-                                                                    label: "Email",
+                                                                    label: t("agents:wizard.fields.notificationChannels.options.email"),
                                                                     value: "email"
                                                                 },
                                                                 {
-                                                                    label: "SMS",
+                                                                    label: t("agents:wizard.fields.notificationChannels.options.sms"),
                                                                     value: "sms"
                                                                 }
                                                             ] }
@@ -364,7 +364,7 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                                                     onClick={ handleClose }
                                                     data-testid={ `${componentId}-cancel-button` }
                                                 >
-                                                    Cancel
+                                                    { t("agents:wizard.buttons.cancel") }
                                                 </Button>
                                             </Grid.Column>
                                             <Grid.Column mobile={ 8 } tablet={ 8 } computer={ 8 }>
@@ -380,7 +380,7 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                                                     } }
                                                     data-testid={ `${componentId}-create-button` }
                                                 >
-                                                    Create
+                                                    { t("agents:wizard.buttons.create") }
                                                 </Button>
                                             </Grid.Column>
                                         </Grid.Row>
@@ -394,56 +394,51 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                                     </div>
                                 </ModalWithSidePanel.Header>
                                 <ModalWithSidePanel.Content>
-                                    <Heading as="h6">Agent Name</Heading>
-                                    <p>The name used for your agent.</p>
+                                    <Heading as="h6">{ t("agents:wizard.help.name.title") }</Heading>
+                                    <p>{ t("agents:wizard.help.name.description") }</p>
 
                                     <Divider />
 
-                                    <Heading as="h6">Description</Heading>
-                                    <p>A brief description of what your agent does.</p>
+                                    <Heading as="h6">{ t("agents:wizard.help.description.title") }</Heading>
+                                    <p>{ t("agents:wizard.help.description.description") }</p>
 
                                     <Divider />
 
-                                    <Heading as="h6">Allow Users to Login</Heading>
+                                    <Heading as="h6">{ t("agents:wizard.help.isUserServingAgent.title") }</Heading>
                                     <p>
-                                        Enable this option if your agent needs users to login to the agent to access
-                                        user specific resources on behalf of the user. This will create an OAuth2/OIDC
-                                        application for the agent.
+                                        { t("agents:wizard.help.isUserServingAgent.description") }
                                     </p>
 
                                     {isUserServingAgent && (
                                         <>
                                             <Divider />
 
-                                            <Heading as="h5">Agent Type</Heading>
-                                            <p>Choose how your agent will interact with users and handle authentication.</p>
+                                            <Heading as="h5">{ t("agents:wizard.help.agentType.title") }</Heading>
+                                            <p>{ t("agents:wizard.help.agentType.description") }</p>
 
                                             <Divider />
 
-                                            <Heading as="h6">Synchronous Agent</Heading>
+                                            <Heading as="h6">{ t("agents:wizard.help.synchronous.title") }</Heading>
                                             <p>
-                                                An agent that works in real time, where the user provides inputs or questions,
-                                                and the agent immediately responds and takes action based on what the user said -
-                                                requiring the user to be actively present to guide the interaction forward.
+                                                { t("agents:wizard.help.synchronous.description") }
                                             </p>
 
                                             <Divider />
 
-                                            <Heading as="h6">Asynchronous Agent</Heading>
+                                            <Heading as="h6">{ t("agents:wizard.help.asynchronous.title") }</Heading>
                                             <p>
-                                                An agent that operates independently in the background, executing tasks and workflows
-                                                without requiring continuous user presence, only engaging with the user when necessary.
+                                                { t("agents:wizard.help.asynchronous.description") }
                                             </p>
 
                                             {isSynchronous && (
                                                 <>
                                                     <Divider />
-                                                    <Heading as="h6">Callback URL</Heading>
+                                                    <Heading as="h6">{ t("agents:wizard.help.callbackUrl.title") }</Heading>
                                                     <p>
-                                                        The redirect URI where the authorization code is sent after user authentication.
+                                                        { t("agents:wizard.help.callbackUrl.description") }
                                                     </p>
                                                     <Hint compact>
-                                                        E.g., https://myapp.io/callback
+                                                        { t("agents:wizard.help.callbackUrl.hint") }
                                                     </Hint>
                                                 </>
                                             )}
@@ -463,13 +458,13 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
             <>
                 <ModalWithSidePanel.MainPanel>
                     <ModalWithSidePanel.Header className="wizard-header">
-                        Agent Created Successfully
+                        { t("agents:wizard.success.title") }
                         <Heading as="h6">
-                            Your agent has been created. Please save the credentials below.
+                            { t("agents:wizard.success.subtitle") }
                         </Heading>
                     </ModalWithSidePanel.Header>
                     <ModalWithSidePanel.Content>
-                        <Heading as="h6">Agent ID</Heading>
+                        <Heading as="h6">{ t("agents:wizard.success.fields.agentId.label") }</Heading>
                         <CopyInputField
                             value={ creationResult?.agentId || "" }
                             data-componentid={ `${componentId}-agent-id-copy` }
@@ -481,12 +476,12 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                             <div style={ { display: "flex", alignItems: "center", gap: "0.5rem" } }>
                                 <Icon name="warning sign" />
                                 <span>
-                                    Make sure to copy your agent secret now as you will not be able to see this again.
+                                    { t("agents:wizard.success.warning") }
                                 </span>
                             </div>
                         </Message>
 
-                        <Heading as="h6">Agent Secret</Heading>
+                        <Heading as="h6">{ t("agents:wizard.success.fields.agentSecret.label") }</Heading>
                         <CopyInputField
                             value={ creationResult?.agentSecret || "" }
                             secret
@@ -497,14 +492,14 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                             <>
                                 <Divider hidden />
 
-                                <Heading as="h6">OAuth Client ID</Heading>
+                                <Heading as="h6">{ t("agents:wizard.success.fields.oauthClientId.label") }</Heading>
                                 {creationResult?.oauthClientId ? (
                                     <CopyInputField
                                         value={ creationResult?.oauthClientId }
                                         data-componentid={ `${componentId}-client-id-copy` }
                                     />
                                 ) : (
-                                    <Hint>OAuth Client ID not available</Hint>
+                                    <Hint>{ t("agents:wizard.success.fields.oauthClientId.unavailable") }</Hint>
                                 )}
                             </>
                         )}
@@ -519,7 +514,7 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                                         onClick={ handleClose }
                                         data-testid={ `${componentId}-done-button` }
                                     >
-                                        Done
+                                        { t("agents:wizard.buttons.done") }
                                     </Button>
                                 </Grid.Column>
                             </Grid.Row>
@@ -533,33 +528,30 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                         </div>
                     </ModalWithSidePanel.Header>
                     <ModalWithSidePanel.Content>
-                        <Heading as="h5">Important: Save Your Credentials</Heading>
+                        <Heading as="h5">{ t("agents:wizard.help.success.title") }</Heading>
                         <p>
-                            Make sure to copy and store these credentials in a secure location.
-                            The agent secret cannot be retrieved again after closing this dialog.
+                            { t("agents:wizard.help.success.description") }
                         </p>
 
                         <Divider />
 
-                        <Heading as="h6">Agent ID</Heading>
+                        <Heading as="h6">{ t("agents:wizard.help.success.agentId.title") }</Heading>
                         <p>
-                            The unique identifier for your agent. Use this to reference the agent in your application.
+                            { t("agents:wizard.help.success.agentId.description") }
                         </p>
 
                         <Divider />
 
-                        <Heading as="h6">Agent Secret</Heading>
+                        <Heading as="h6">{ t("agents:wizard.help.success.agentSecret.title") }</Heading>
                         <p>
-                            The password for your agent. Keep this secure and never share it publicly.
+                            { t("agents:wizard.help.success.agentSecret.description") }
                         </p>
 
                         <Divider />
 
-                        <Heading as="h6">OAuth Client ID</Heading>
+                        <Heading as="h6">{ t("agents:wizard.help.success.oauthClientId.title") }</Heading>
                         <p>
-                            The OAuth 2.0 client identifier for your agent application.
-                            Use this for OAuth authentication flows. This is only available
-                            if you enabled "Allow users to login to this agent".
+                            { t("agents:wizard.help.success.oauthClientId.description") }
                         </p>
                     </ModalWithSidePanel.Content>
                 </ModalWithSidePanel.SidePanel>
