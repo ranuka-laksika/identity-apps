@@ -78,9 +78,8 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
             return;
         }
 
-        // Save the submitted values so the form can display them during loading
-        setSubmittedValues(values);
         setIsSubmitting(true);
+        setSubmittedValues(values);
 
         const addAgentPayload: AgentScimSchema = {
             "urn:scim:wso2:agent:schema": {
@@ -110,7 +109,7 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
             );
 
             const result: AgentCreationResultInterface = {
-                agentId: response?.userName,
+                agentId: response?.id,
                 agentSecret: response?.password,
                 oauthClientId: undefined,
                 isUserServingAgent: values?.isUserServingAgent || false

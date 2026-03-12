@@ -47,18 +47,6 @@ interface AgentSecretShowModalProps extends IdentifiableComponentInterface {
      */
     agentSecret?: string;
     /**
-     * The client ID of the Oauth application created alongside the agent.
-     */
-    applicationClientId?: string;
-    /**
-     * Whether this is a user-serving agent (has an associated OAuth application).
-     */
-    isUserServingAgent?: boolean;
-    /**
-     * Whether the application client ID is currently being fetched.
-     */
-    isFetchingClientId?: boolean;
-    /**
      * Flag indicating whether the modal is open.
      */
     isOpen: boolean;
@@ -76,9 +64,6 @@ export function AgentSecretShowModal({
     title,
     agentId,
     agentSecret,
-    applicationClientId,
-    isUserServingAgent,
-    isFetchingClientId,
     isOpen,
     onClose,
     isForSecretRegeneration,
@@ -186,20 +171,6 @@ export function AgentSecretShowModal({
                                 data-componentid={ "agent-secret-readonly-input" }
                             />
                         </div>
-                        { !isForSecretRegeneration && isUserServingAgent && (
-                            <>
-                                <div style={ { marginTop: "2%" } }></div>
-                                <label>OAuth Client ID</label>
-                                <div style={ { marginTop: "1%" } }>
-                                    { /* Show loading state while fetching the client ID from the backend */ }
-                                    <CopyInputField
-                                        className="agent-application-client-id-input"
-                                        value={ isFetchingClientId ? "Loading..." : (applicationClientId || "") }
-                                        data-componentid="agent-application-client-id-readonly-input"
-                                    />
-                                </div>
-                            </>
-                        ) }
                     </>)
                 }
             </Modal.Content>
