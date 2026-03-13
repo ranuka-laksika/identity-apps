@@ -103,6 +103,10 @@ export const agents: AgentsNS = {
                 description: "Failed to fetch OAuth Client ID",
                 message: "Client ID not available"
             },
+            configUpdateFailed: {
+                description: "Failed to update agent OAuth configuration",
+                message: "Configuration update failed"
+            },
             created: {
                 description: "Agent created successfully",
                 message: "Success"

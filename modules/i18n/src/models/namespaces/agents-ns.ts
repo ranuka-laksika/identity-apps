@@ -110,6 +110,10 @@ export interface AgentsNS {
                 message: string;
                 description: string;
             };
+            configUpdateFailed: {
+                message: string;
+                description: string;
+            };
         };
         success: {
             title: string;

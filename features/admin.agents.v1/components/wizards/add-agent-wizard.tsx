@@ -30,7 +30,7 @@ import { Field } from "react-final-form";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { Divider, Form, Grid, Icon, Message, Radio } from "semantic-ui-react";
-import { addAgent } from "../../api/agents";
+import { addAgent, updateAgentApplicationConfiguration } from "../../api/agents";
 import { AgentScimSchema, AgentType } from "../../models/agents";
 
 interface AddAgentWizardPropsInterface extends IdentifiableComponentInterface {
@@ -81,32 +81,19 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
         setIsSubmitting(true);
         setSubmittedValues(values);
 
+        // Step 1: Create SCIM payload with minimal data (only send isUserServingAgent flag)
         const addAgentPayload: AgentScimSchema = {
             "urn:scim:wso2:agent:schema": {
                 Description: values?.description,
                 DisplayName: values?.name,
                 IsUserServingAgent: values?.isUserServingAgent || false,
-                AgentType: values?.agentType,
-                CallbackUrl: values?.callbackUrl,
-                CibaAuthReqExpiryTime: values?.cibaAuthReqExpiryTime,
-                NotificationChannels: Array.isArray(values?.notificationChannels)
-                    ? values.notificationChannels.join(",")
-                    : values?.notificationChannels,
                 Owner: authenticatedUserInfo?.username
             }
         };
 
         try {
-            // Create the agent
+            // Step 2: Create the agent via SCIM
             const response: AgentScimSchema = await addAgent(addAgentPayload);
-
-            dispatch(
-                addAlert({
-                    description: t("agents:wizard.alerts.created.description"),
-                    level: AlertLevels.SUCCESS,
-                    message: t("agents:wizard.alerts.created.message")
-                })
-            );
 
             const result: AgentCreationResultInterface = {
                 agentId: response?.id,
@@ -115,31 +102,48 @@ const AddAgentWizard: FunctionComponent<AddAgentWizardPropsInterface> = (
                 isUserServingAgent: values?.isUserServingAgent || false
             };
 
-            // If this is a user-serving agent, fetch the OAuth Client ID before showing success screen
-            if (values?.isUserServingAgent && response?.userName) {
+            // Step 3: If this is a user-serving agent, update application OAuth configuration
+            if (values?.isUserServingAgent && response?.id) {
                 try {
-                    // Extract the application ID from response id (agentId == applicationId)
+                    // Extract the application ID from response (agentId == applicationId)
                     const applicationId: string = response.id;
 
-                    // Fetch the OIDC configuration for the application
+                    // Update application OAuth configuration via Application REST API
+                    await updateAgentApplicationConfiguration(applicationId, {
+                        agentType: values?.agentType,
+                        callbackUrl: values?.callbackUrl,
+                        cibaAuthReqExpiryTime: values?.cibaAuthReqExpiryTime,
+                        notificationChannels: values?.notificationChannels
+                    });
+
+                    // Step 4: Fetch the OAuth Client ID
                     const oidcConfig: any = await getInboundProtocolConfig(applicationId, "oidc");
 
                     if (oidcConfig?.clientId) {
                         result.oauthClientId = oidcConfig.clientId;
                     }
                 } catch (error) {
-                    // Continue showing the result even if client ID fetch fails
+                    // If Application API update fails, show warning but continue
                     dispatch(
                         addAlert({
-                            description: t("agents:wizard.alerts.clientIdFetchFailed.description"),
+                            description: t("agents:wizard.alerts.configUpdateFailed.description"),
                             level: AlertLevels.WARNING,
-                            message: t("agents:wizard.alerts.clientIdFetchFailed.message")
+                            message: t("agents:wizard.alerts.configUpdateFailed.message")
                         })
                     );
                 }
             }
 
-            // Show success screen with all data ready
+            // Step 5: Show success alert
+            dispatch(
+                addAlert({
+                    description: t("agents:wizard.alerts.created.description"),
+                    level: AlertLevels.SUCCESS,
+                    message: t("agents:wizard.alerts.created.message")
+                })
+            );
+
+            // Step 6: Show success screen with all data ready
             setCreationResult(result);
             setIsShowingSuccessScreen(true);
             setIsSubmitting(false);
