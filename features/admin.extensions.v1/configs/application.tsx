@@ -241,18 +241,9 @@ export const applicationConfig: ApplicationConfig = {
                         index: application?.templateId === ApplicationManagementConstants.M2M_APP_TEMPLATE_ID
                             ? M2M_API_AUTHORIZATION_INDEX + tabExtensions.length
                             : API_AUTHORIZATION_INDEX + tabExtensions.length,
-                        menuItem: application?.originalTemplateId === ApplicationTemplateIdTypes.MCP_CLIENT_APPLICATION
-                            ? I18n.instance.t(
-                                "extensions:develop.applications.edit.sections.resourceAuthorization.title"
-                            )
-                            : (application?.originalTemplateId
-                                === ApplicationTemplateIdTypes.DIGITAL_WALLET_APPLICATION)
-                                ? I18n.instance.t(
-                                    "extensions:develop.applications.edit.sections.resourceAuthorization.title"
-                                )
-                                : I18n.instance.t(
-                                    "extensions:develop.applications.edit.sections.apiAuthorization.title"
-                                ),
+                        menuItem: I18n.instance.t(
+                            "extensions:develop.applications.edit.sections.resourceAuthorization.title"
+                        ),
                         render: () => (
                             <ResourceTab.Pane controlledSegmentation>
                                 <APIAuthorization

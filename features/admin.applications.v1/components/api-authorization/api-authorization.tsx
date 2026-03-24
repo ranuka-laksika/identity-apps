@@ -94,12 +94,10 @@ export const APIAuthorization: FunctionComponent<APIAuthorizationResourcesProps>
     const { getLink } = useDocumentation();
 
     const isDigitalWallet: boolean = originalTemplateId === "digital-wallet-application";
-    const isMCPClient: boolean = originalTemplateId === "mcp-client-application";
-    const resourceText: string = isMCPClient
-        ? t("extensions:develop.applications.edit.sections.apiAuthorization.resourceText.genericResource")
-        : isDigitalWallet
-            ? t("extensions:develop.applications.edit.sections.apiAuthorization.resourceText.vcResource")
-            : t("extensions:develop.applications.edit.sections.apiAuthorization.resourceText.apiResource");
+    // Use "resource" for all apps that can access MCP Servers, "verifiable credential" for Digital Wallet
+    const resourceText: string = isDigitalWallet
+        ? t("extensions:develop.applications.edit.sections.apiAuthorization.resourceText.vcResource")
+        : t("extensions:develop.applications.edit.sections.apiAuthorization.resourceText.genericResource");
 
     const [ isSubAPIResourcesSectionLoading, setSubAPIResourcesSectionLoading ] = useState<boolean>(false);
     const [ isShownError, setIsShownError ] = useState<boolean>(false);
