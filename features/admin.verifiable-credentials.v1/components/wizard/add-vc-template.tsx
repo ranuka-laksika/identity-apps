@@ -23,7 +23,11 @@ import Autocomplete, {
 import Chip from "@oxygen-ui/react/Chip";
 import TextField from "@oxygen-ui/react/TextField";
 import { getAllExternalClaims, getAllLocalClaims } from "@wso2is/admin.claims.v1/api";
-import { AlertInterface, AlertLevels, Claim, ExternalClaim, IdentifiableComponentInterface } from "@wso2is/core/models";
+import { AppConstants } from "@wso2is/admin.core.v1/constants/app-constants";
+import { history } from "@wso2is/admin.core.v1/helpers/history";
+import { AlertInterface, AlertLevels, Claim, ExternalClaim, IdentifiableComponentInterface,
+    HttpErrorResponseDataInterface
+} from "@wso2is/core/models";
 import { addAlert } from "@wso2is/core/store";
 import { FinalForm, FinalFormField, FormRenderProps, TextFieldAdapter } from "@wso2is/form/src";
 import { Button, Hint } from "@wso2is/react-components";
@@ -46,10 +50,6 @@ interface AddVCTemplateWizardProps extends IdentifiableComponentInterface {
      * Callback to close the wizard.
      */
     closeWizard: () => void;
-    /**
-     * Callback to refresh the list after successful creation.
-     */
-    onSuccess?: () => void;
 }
 
 /**
@@ -68,7 +68,6 @@ interface VCTemplateFormValues {
  */
 export default function AddVCTemplateWizard({
     closeWizard,
-    onSuccess,
     [ "data-componentid" ]: componentId = "add-vc-template-wizard"
 }: AddVCTemplateWizardProps): ReactElement {
     const { t } = useTranslation();
@@ -239,17 +238,18 @@ export default function AddVCTemplateWizard({
         };
 
         addVCTemplate(templateData)
-            .then((_response: VCTemplate) => {
+            .then((response: VCTemplate) => {
                 dispatch(addAlert<AlertInterface>({
                     description: t("verifiableCredentials:notifications.createTemplate.success.description"),
                     level: AlertLevels.SUCCESS,
                     message: t("verifiableCredentials:notifications.createTemplate.success.message")
                 }));
 
-                onSuccess?.();
-                closeWizard();
+                history.push(
+                    AppConstants.getPaths().get("VC_TEMPLATE_EDIT").replace(":id", response.id)
+                );
             })
-            .catch((error: AxiosError) => {
+            .catch((error: AxiosError<HttpErrorResponseDataInterface>) => {
                 if (error?.response?.status === 409) {
                     dispatch(addAlert<AlertInterface>({
                         description: t("verifiableCredentials:notifications.createTemplate.duplicateError.description"),
@@ -266,6 +266,7 @@ export default function AddVCTemplateWizard({
             })
             .finally(() => {
                 setIsSubmitting(false);
+                closeWizard();
             });
     };
 

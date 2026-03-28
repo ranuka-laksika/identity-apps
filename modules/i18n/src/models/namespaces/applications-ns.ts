@@ -1553,6 +1553,14 @@ export interface ApplicationsNS {
                         hint: string;
                         label: string;
                     };
+                    skipUserValidation: {
+                        hint: string;
+                        label: string;
+                    };
+                    allowFederatedUsers: {
+                        hint: string;
+                        label: string;
+                    };
                     heading: string;
                 }
             };
@@ -2409,6 +2417,7 @@ export interface ApplicationsNS {
                     oidcConfigurations: {
                         labels: {
                             authorize: string;
+                            backchannelAuthentication: string;
                             dynamicClientRegistration: string;
                             endSession: string;
                             introspection: string;

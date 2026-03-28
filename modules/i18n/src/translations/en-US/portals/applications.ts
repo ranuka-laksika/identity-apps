@@ -1823,6 +1823,19 @@ export const applications: ApplicationsNS = {
                             "this client application is permitted to request.",
                         label: "Allowed Notification Delivery Methods"
                     },
+                    skipUserValidation: {
+                        hint: "When enabled, the server skips the validation that verifies the " +
+                            "resolved user from the login_hint matches the user who completes " +
+                            "the authentication.",
+                        label: "Skip user validation"
+                    },
+                    allowFederatedUsers: {
+                        hint: "Allow sending CIBA notifications to users not found in the local " +
+                            "user store. The notification is sent directly to the login_hint value, " +
+                            "using the notification channel to determine if it is an email or " +
+                            "phone number. Requires skip user validation to be enabled.",
+                        label: "Allow federated users"
+                    },
                     heading: "Client Initiated Backchannel Authentication"
                 }
             },
@@ -2788,6 +2801,7 @@ export const applications: ApplicationsNS = {
                     oidcConfigurations: {
                         labels: {
                             authorize: "Authorize",
+                            backchannelAuthentication: "Backchannel Authentication",
                             dynamicClientRegistration: "Dynamic Client Registration",
                             endSession: "Logout",
                             introspection: "Introspection",

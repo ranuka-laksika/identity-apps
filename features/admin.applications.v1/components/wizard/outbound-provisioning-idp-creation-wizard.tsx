@@ -20,7 +20,9 @@ import {
     IdentityProviderInterface,
     OutboundProvisioningConnectorInterface
 } from "@wso2is/admin.identity-providers.v1/models/identity-provider";
-import { AlertLevels, IdentifiableComponentInterface, TestableComponentInterface } from "@wso2is/core/models";
+import { AlertLevels, IdentifiableComponentInterface, TestableComponentInterface,
+    HttpErrorResponseDataInterface
+} from "@wso2is/core/models";
 import { addAlert } from "@wso2is/core/store";
 import { useTrigger } from "@wso2is/forms";
 import { Heading, LinkButton, PrimaryButton, Steps } from "@wso2is/react-components";
@@ -74,6 +76,8 @@ export const OutboundProvisioningIdpCreateWizard: FunctionComponent<
         const [ partiallyCompletedStep, setPartiallyCompletedStep ] = useState<number>(undefined);
         const [ currentWizardStep, setCurrentWizardStep ] = useState<number>(currentStep);
         const [ isSubmitting, setIsSubmitting ] = useState<boolean>(false);
+        const [ isConnectorListLoading, setIsConnectorListLoading ] = useState<boolean>(false);
+        const [ isIdpSelected, setIsIdpSelected ] = useState<boolean>(false);
 
         const {
             data: identityProviderList,
@@ -157,7 +161,7 @@ export const OutboundProvisioningIdpCreateWizard: FunctionComponent<
 
                     onUpdate(application.id);
                 })
-                .catch((error: AxiosError) => {
+                .catch((error: AxiosError<HttpErrorResponseDataInterface>) => {
                     if (error.response && error.response.data && error.response.data.description) {
                         dispatch(addAlert({
                             description: error.response.data.description,
@@ -238,6 +242,12 @@ export const OutboundProvisioningIdpCreateWizard: FunctionComponent<
                         data-testid={ `${ testId }-form` }
                         data-componentid={ `${ componentId }-form` }
                         isSubmitting={ isSubmitting }
+                        onConnectorLoadingChange={ (isLoading: boolean) => {
+                            setIsConnectorListLoading(isLoading);
+                            if (isLoading) {
+                                setIsIdpSelected(true);
+                            }
+                        } }
                     />
                 ),
                 icon: getApplicationWizardStepIcons().general,
@@ -324,8 +334,8 @@ export const OutboundProvisioningIdpCreateWizard: FunctionComponent<
                                         onClick={ navigateToNext }
                                         data-testid={ `${ testId }-finish-button` }
                                         data-componentid={ `${ componentId }-finish-button` }
-                                        loading={ isSubmitting }
-                                        disabled={ isSubmitting }
+                                        loading={ isSubmitting || isConnectorListLoading }
+                                        disabled={ isSubmitting || isConnectorListLoading || !isIdpSelected }
                                     >
                                         { t("common:finish") }
                                     </PrimaryButton>

@@ -310,6 +310,10 @@ export interface FeatureConfigInterface {
      * Customer Data feature.
      */
     customerData?: FeatureAccessConfigInterface;
+    /**
+     * Customer Data Service feature.
+     */
+    customerDataService?: FeatureAccessConfigInterface;
 }
 
 /**
@@ -360,6 +364,9 @@ export interface DeploymentConfigInterface extends CommonDeploymentConfigInterfa
  */
 export interface FlowExecutionCompatibilityInterface {
     enableLegacyFlows?: string;
+    enableLegacySelfRegistrationFlow?: string;
+    enableLegacyInvitedUserRegistrationFlow?: string;
+    enableLegacyPasswordRecoveryFlow?: string;
 }
 
 /**
@@ -708,6 +715,9 @@ export interface UIConfigInterface extends CommonUIConfigInterface<FeatureConfig
      */
     flowExecution: {
         enableLegacyFlows: boolean;
+        enableLegacySelfRegistrationFlow?: boolean;
+        enableLegacyInvitedUserRegistrationFlow?: boolean;
+        enableLegacyPasswordRecoveryFlow?: boolean;
     };
     /**
      * Enable legacy session bound token behaviour.
@@ -721,6 +731,10 @@ export interface UIConfigInterface extends CommonUIConfigInterface<FeatureConfig
      * Flag to check whether the password reset enforcer authenticator is enabled.
      */
     isPasswordResetEnforcerEnabled?: boolean;
+    /**
+     * Flag to check whether the password reset enforcement scope configuration is enabled.
+     */
+    isPasswordResetEnforcementScopeEnabled?: boolean;
 }
 
 /**

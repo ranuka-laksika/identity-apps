@@ -1,5 +1,41 @@
 # @wso2is/myaccount
 
+## 3.0.2
+
+### Patch Changes
+
+- [#9849](https://github.com/wso2/identity-apps/pull/9849) [`8773dc284b272d8668f9051c52257549d6db97d5`](https://github.com/wso2/identity-apps/commit/8773dc284b272d8668f9051c52257549d6db97d5) Thanks [@Malith-19](https://github.com/Malith-19)! - Update the password reset confirmation message.
+
+- Updated dependencies [[`8773dc284b272d8668f9051c52257549d6db97d5`](https://github.com/wso2/identity-apps/commit/8773dc284b272d8668f9051c52257549d6db97d5)]:
+  - @wso2is/i18n@2.37.4
+
+## 3.0.1
+
+### Patch Changes
+
+- [#9859](https://github.com/wso2/identity-apps/pull/9859) [`440143c068fbf44bf75a7860f1c754d4aff56a63`](https://github.com/wso2/identity-apps/commit/440143c068fbf44bf75a7860f1c754d4aff56a63) Thanks [@RavindiFernando](https://github.com/RavindiFernando)! - Axios and SDK version bump
+
+- Updated dependencies [[`8a1e91278bc6b376e8e82bddbf94f98ceb76f6fc`](https://github.com/wso2/identity-apps/commit/8a1e91278bc6b376e8e82bddbf94f98ceb76f6fc)]:
+  - @wso2is/i18n@2.37.3
+
+## 3.0.0
+
+### Major Changes
+
+- [#9825](https://github.com/wso2/identity-apps/pull/9825) [`2a5a8feb389c2476e50e730a11142f78ded5aed9`](https://github.com/wso2/identity-apps/commit/2a5a8feb389c2476e50e730a11142f78ded5aed9) Thanks [@pavinduLakshan](https://github.com/pavinduLakshan)! - Major version bump for the upcoming release
+
+## 2.29.0
+
+### Minor Changes
+
+- [#9770](https://github.com/wso2/identity-apps/pull/9770) [`487fe9485a488b8272e10befdbe0a66028d388e2`](https://github.com/wso2/identity-apps/commit/487fe9485a488b8272e10befdbe0a66028d388e2) Thanks [@pavinduLakshan](https://github.com/pavinduLakshan)! - Prepare identity apps for next iteration
+
+## 2.28.0
+
+### Minor Changes
+
+- [#9763](https://github.com/wso2/identity-apps/pull/9763) [`adf78d43ea9f836c456f5f7e326e93a58a93aa73`](https://github.com/wso2/identity-apps/commit/adf78d43ea9f836c456f5f7e326e93a58a93aa73) Thanks [@pavinduLakshan](https://github.com/pavinduLakshan)! - Prepare for identity server 7.3.0
+
 ## 2.27.0
 
 ### Minor Changes

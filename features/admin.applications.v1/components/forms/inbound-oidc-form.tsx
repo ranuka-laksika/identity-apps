@@ -358,6 +358,8 @@ export const InboundOIDCForm: FunctionComponent<InboundOIDCFormPropsInterface> =
     const applicationSubjectTokenExpiryInSeconds: MutableRefObject<HTMLElement> = useRef<HTMLElement>();
     const authReqExpiryTime: MutableRefObject<HTMLElement> = useRef<HTMLElement>();
     const notificationChannels: MutableRefObject<HTMLDivElement> = useRef<HTMLDivElement>();
+    const cibaSkipUserValidation: MutableRefObject<HTMLElement> = useRef<HTMLElement>();
+    const cibaAllowFederatedUsers: MutableRefObject<HTMLElement> = useRef<HTMLElement>();
 
     const [ isSPAApplication, setSPAApplication ] = useState<boolean>(false);
     const [ isOIDCWebApplication, setOIDCWebApplication ] = useState<boolean>(false);
@@ -377,6 +379,9 @@ export const InboundOIDCForm: FunctionComponent<InboundOIDCFormPropsInterface> =
     const [ sharedOrganizationsList, setSharedOrganizationsList ] = useState<Array<OrganizationInterface>>(undefined);
     const [ enableHybridFlowResponseTypeField , setEnableHybridFlowResponseTypeField ] = useState<boolean>(undefined);
     const [ showCibaFields, setShowCibaFields ] = useState<boolean>(false);
+    const [ isSkipUserValidationEnabled, setIsSkipUserValidationEnabled ] = useState<boolean>(
+        initialValues?.cibaAuthenticationRequest?.skipUserValidation ?? false
+    );
 
     const [ triggerCertSubmit, setTriggerCertSubmit ] = useTrigger();
 
@@ -825,6 +830,12 @@ export const InboundOIDCForm: FunctionComponent<InboundOIDCFormPropsInterface> =
         setIsSubjectTokenFeatureAvailable(isSubjectTokenFeatureEnabled ? initialValues?.subjectToken ?
             true : false : false);
     }, [ initialValues ]);
+
+    useEffect(() => {
+        setIsSkipUserValidationEnabled(
+            initialValues?.cibaAuthenticationRequest?.skipUserValidation ?? false
+        );
+    }, [ initialValues?.cibaAuthenticationRequest?.skipUserValidation ]);
 
     useEffect(() => {
         if (isGrantChanged) {
@@ -1349,6 +1360,13 @@ export const InboundOIDCForm: FunctionComponent<InboundOIDCFormPropsInterface> =
                     return;
                 }
 
+                // Hide CIBA grant type for public clients.
+                // CIBA requires a backchannel and a confidential client secret,
+                // which public clients (SPA, mobile) cannot securely hold.
+                if (isPublicClient && name === ApplicationManagementConstants.CIBA_GRANT) {
+                    return;
+                }
+
                 /**
                  * Create the checkbox children object. hint is marked
                  * as optional because not all children have hint/description
@@ -1609,18 +1627,23 @@ export const InboundOIDCForm: FunctionComponent<InboundOIDCFormPropsInterface> =
                 inboundConfigFormValues = {
                     ...inboundConfigFormValues,
                     cibaAuthenticationRequest: {
+                        allowFederatedUsers: values.get("cibaSkipUserValidation")?.length > 0
+                            && values.get("cibaAllowFederatedUsers")?.length > 0,
                         authReqExpiryTime: values.get("authReqExpiryTime")
                             ? parseInt(values.get("authReqExpiryTime") as string, 10)
                             : undefined,
-                        notificationChannels: notificationChannels
+                        notificationChannels: notificationChannels,
+                        skipUserValidation: values.get("cibaSkipUserValidation")?.length > 0
                     }
                 };
             } else {
                 inboundConfigFormValues = {
                     ...inboundConfigFormValues,
                     cibaAuthenticationRequest: {
+                        allowFederatedUsers: false,
                         authReqExpiryTime: undefined,
-                        notificationChannels: []
+                        notificationChannels: [],
+                        skipUserValidation: false
                     }
                 };
             }
@@ -1938,6 +1961,9 @@ export const InboundOIDCForm: FunctionComponent<InboundOIDCFormPropsInterface> =
     const handleClientAuthenticationChange = (publicClient: boolean):void => {
         if (publicClient) {
             setSelectedAuthMethod("");
+            setSelectedGrantTypes((prev: string[]) =>
+                prev?.filter((grant: string) => grant !== ApplicationManagementConstants.CIBA_GRANT)
+            );
         }
     };
 
@@ -2120,6 +2146,7 @@ export const InboundOIDCForm: FunctionComponent<InboundOIDCFormPropsInterface> =
     const isClientAuthenticationSectionEnabled: boolean = (
         ApplicationTemplateIdTypes.CUSTOM_APPLICATION === template?.templateId
         || ApplicationTemplateIdTypes.OIDC_WEB_APPLICATION === template?.templateId
+        || ApplicationTemplateIdTypes.AGENT_APPLICATION === template?.templateId
     ) && !isSystemApplication
       && !isDefaultApplication
       && (isPublicClientFieldEnabled || isClientAuthenticationMethodFieldEnabled);
@@ -2309,6 +2336,74 @@ export const InboundOIDCForm: FunctionComponent<InboundOIDCFormPropsInterface> =
                                     { productName:
                                         config.ui.productName }) }
                                 </Hint>
+                            </Grid.Column>
+                        </Grid.Row>
+                        <Grid.Row columns={ 1 }>
+                            <Grid.Column mobile={ 16 }>
+                                <Field
+                                    ref={ cibaSkipUserValidation }
+                                    name="cibaSkipUserValidation"
+                                    required={ false }
+                                    type="checkbox"
+                                    value={
+                                        initialValues?.cibaAuthenticationRequest
+                                            ?.skipUserValidation
+                                            ? [ "cibaSkipUserValidation" ]
+                                            : []
+                                    }
+                                    listen={ (values: Map<string, FormValue>): void => {
+                                        const isEnabled: boolean =
+                                            values.get("cibaSkipUserValidation")?.length > 0;
+
+                                        setIsSkipUserValidationEnabled(isEnabled);
+                                    } }
+                                    children={ [
+                                        {
+                                            label: t("applications:forms.inboundOIDC.fields." +
+                                                "ciba.skipUserValidation.label"),
+                                            value: "cibaSkipUserValidation"
+                                        }
+                                    ] }
+                                    readOnly={ readOnly }
+                                    data-componentid={
+                                        `${ testId }-ciba-skip-user-validation-checkbox`
+                                    }
+                                />
+                                <Hint>
+                                    { t("applications:forms.inboundOIDC.fields." +
+                                        "ciba.skipUserValidation.hint") }
+                                </Hint>
+                                <div style={ { paddingLeft: "1.5rem" } }>
+                                    <Field
+                                        ref={ cibaAllowFederatedUsers }
+                                        name="cibaAllowFederatedUsers"
+                                        required={ false }
+                                        type="checkbox"
+                                        value={
+                                            isSkipUserValidationEnabled
+                                            && initialValues?.cibaAuthenticationRequest
+                                                ?.allowFederatedUsers
+                                                ? [ "cibaAllowFederatedUsers" ]
+                                                : []
+                                        }
+                                        disabled={ !isSkipUserValidationEnabled }
+                                        children={ [
+                                            {
+                                                label: t("applications:forms.inboundOIDC.fields." +
+                                                    "ciba.allowFederatedUsers.label"),
+                                                value: "cibaAllowFederatedUsers"
+                                            }
+                                        ] }
+                                        readOnly={ readOnly }
+                                        data-componentid={
+                                            `${ testId }-ciba-allow-federated-users-checkbox`
+                                        }
+                                    />
+                                    <Hint>
+                                        { t("applications:forms.inboundOIDC.fields." +
+                                            "ciba.allowFederatedUsers.hint") }
+                                    </Hint>
+                                </div>
                             </Grid.Column>
                         </Grid.Row>
                     </>

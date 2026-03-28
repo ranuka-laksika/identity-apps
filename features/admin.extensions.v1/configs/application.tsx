@@ -231,6 +231,7 @@ export const applicationConfig: ApplicationConfig = {
                     || application?.templateId === SinglePageAppTemplate?.id
                     || application?.templateId === ApplicationManagementConstants.M2M_APP_TEMPLATE_ID
                     || application?.templateId === ApplicationTemplateIdTypes.DIGITAL_WALLET_APPLICATION
+                    || application?.templateId === ApplicationTemplateIdTypes.AGENT_APPLICATION
                 )
                 && application.name !== ApplicationManagementConstants.MY_ACCOUNT_APP_NAME
             ) {
@@ -276,7 +277,8 @@ export const applicationConfig: ApplicationConfig = {
                     || application?.templateId === OIDCWebAppTemplate?.id
                     || application?.templateId === SinglePageAppTemplate?.id
                     || application?.templateId === SamlWebAppTemplate?.id
-                    || application?.templateId === ApplicationTemplateIdTypes.DIGITAL_WALLET_APPLICATION)
+                    || application?.templateId === ApplicationTemplateIdTypes.DIGITAL_WALLET_APPLICATION
+                    || application?.templateId === ApplicationTemplateIdTypes.AGENT_APPLICATION)
                 )
                 && application.name !== ApplicationManagementConstants.MY_ACCOUNT_APP_NAME
             ) {
@@ -379,8 +381,10 @@ export const applicationConfig: ApplicationConfig = {
                     });
             }
 
-            // Hide danger zone for Enterprise IDP Login Applications.
-            return !(application.name.startsWith("WSO2_LOGIN_FOR_") || isEnterpriseLoginMgt === "true");
+            // Hide danger zone for Enterprise IDP Login Applications and Agent Applications.
+            return !(application.name.startsWith("WSO2_LOGIN_FOR_")
+                || isEnterpriseLoginMgt === "true"
+                || application?.templateId === ApplicationTemplateIdTypes.AGENT_APPLICATION);
         },
         showDeleteButton: (application: ApplicationInterface): boolean => {
             let isEnterpriseLoginMgt: string;
@@ -394,8 +398,10 @@ export const applicationConfig: ApplicationConfig = {
                     });
             }
 
-            // Hide delete button for Enterprise IDP Login Applications.
-            return !(application.name.startsWith("WSO2_LOGIN_FOR_") || isEnterpriseLoginMgt === "true");
+            // Hide delete button for Enterprise IDP Login Applications and Agent Applications.
+            return !(application.name.startsWith("WSO2_LOGIN_FOR_")
+                || isEnterpriseLoginMgt === "true"
+                || application?.templateId === ApplicationTemplateIdTypes.AGENT_APPLICATION);
         },
         showProvisioningSettings: true
     },
@@ -430,7 +436,11 @@ export const applicationConfig: ApplicationConfig = {
             ApplicationManagementConstants.AUTHORIZATION_CODE_GRANT,
             ApplicationManagementConstants.REFRESH_TOKEN_GRANT,
             ApplicationManagementConstants.IMPLICIT_GRANT,
-            ApplicationManagementConstants.ORGANIZATION_SWITCH_GRANT,
+            ApplicationManagementConstants.ORGANIZATION_SWITCH_GRANT
+        ],
+        [ "agent-application" ]: [
+            ApplicationManagementConstants.AUTHORIZATION_CODE_GRANT,
+            ApplicationManagementConstants.REFRESH_TOKEN_GRANT,
             ApplicationManagementConstants.CIBA_GRANT
         ],
         [ "angular-application" ]: [
@@ -503,8 +513,7 @@ export const applicationConfig: ApplicationConfig = {
             ApplicationManagementConstants.PASSWORD,
             ApplicationManagementConstants.DEVICE_GRANT,
             ApplicationManagementConstants.ORGANIZATION_SWITCH_GRANT,
-            ApplicationManagementConstants.OAUTH2_TOKEN_EXCHANGE,
-            ApplicationManagementConstants.CIBA_GRANT
+            ApplicationManagementConstants.OAUTH2_TOKEN_EXCHANGE
         ],
         [ "nextjs-application" ]: [
             ApplicationManagementConstants.AUTHORIZATION_CODE_GRANT,
@@ -519,8 +528,7 @@ export const applicationConfig: ApplicationConfig = {
             ApplicationManagementConstants.AUTHORIZATION_CODE_GRANT,
             ApplicationManagementConstants.IMPLICIT_GRANT,
             ApplicationManagementConstants.REFRESH_TOKEN_GRANT,
-            ApplicationManagementConstants.ORGANIZATION_SWITCH_GRANT,
-            ApplicationManagementConstants.CIBA_GRANT
+            ApplicationManagementConstants.ORGANIZATION_SWITCH_GRANT
         ],
         [ "sub-organization-application" ]: [
             ApplicationManagementConstants.REFRESH_TOKEN_GRANT,
@@ -663,6 +671,7 @@ export const applicationConfig: ApplicationConfig = {
         }
     },
     templates:{
+        agent: true,
         custom: true,
         customProtocol: true,
         m2m: !featureConfig?.applications?.disabledFeatures?.includes("m2mTemplate"),

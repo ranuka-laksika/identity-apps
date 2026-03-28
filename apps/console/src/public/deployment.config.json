@@ -436,10 +436,27 @@
                 "enabled": true,
                 "featureFlags": [],
                 "scopes": {
-                    "create": [],
-                    "delete": [],
-                    "read": [],
-                    "update": []
+                    "create": [
+                        "internal_agent_mgt_create"
+                    ],
+                    "delete": [
+                        "internal_agent_mgt_delete"
+                    ],
+                    "feature": [
+                        "console:agents"
+                    ],
+                    "read": [
+                        "internal_agent_mgt_list",
+                        "internal_agent_mgt_view",
+                        "internal_governance_view",
+                        "internal_group_mgt_view",
+                        "internal_login",
+                        "internal_role_mgt_view",
+                        "internal_userstore_view"
+                    ],
+                    "update": [
+                       "internal_agent_mgt_update"
+                    ]
                 }
             },
             "ai": {
@@ -1359,14 +1376,12 @@
                 "scopes": {
                     "create": [
                         "internal_application_mgt_create",
-                        "internal_branding_preference_update",
-                        "internal_governance_update"
+                        "internal_branding_preference_update"
                     ],
                     "delete": [],
                     "feature": [
                         "console:applications",
-                        "console:branding",
-                        "console:loginAndRegistration"
+                        "console:branding"
                     ],
                     "read": [],
                     "update": []
@@ -1988,7 +2003,7 @@
             },
             "verifiableCredentials": {
                 "disabledFeatures": [],
-                "enabled": false,
+                "enabled": true,
                 "featureFlags": [],
                 "scopes": {
                     "create": [
@@ -2056,7 +2071,10 @@
             }
         },
         "flowExecution": {
-            "enableLegacyFlows": false
+            "enableLegacyFlows": false,
+            "enableLegacyInvitedUserRegistrationFlow": false,
+            "enableLegacyPasswordRecoveryFlow": false,
+            "enableLegacySelfRegistrationFlow": false
         },
         "governanceConnectors": {
             "loginAttempts": {

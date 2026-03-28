@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { Dispatch } from "redux";
 import { Form, Grid } from "semantic-ui-react";
+import useGetOIDCDiscovery from "../../api/use-get-discovery";
 import { getHelpPanelIcons } from "../../configs/ui";
 import { ApplicationManagementConstants } from "../../constants/application-management";
 import {
@@ -75,6 +76,8 @@ export const OIDCConfigurations: FunctionComponent<OIDCConfigurationsPropsInterf
     } = props;
 
     const [ endpoints, setEndpoints ] = useState<OIDCEndpointsInterface>(undefined);
+
+    const { data: wellKnownResponse } = useGetOIDCDiscovery();
 
     useEffect(() => {
         if (endpoints !== undefined) {
@@ -126,7 +129,9 @@ export const OIDCConfigurations: FunctionComponent<OIDCConfigurationsPropsInterf
                     </Grid.Column>
                     <Grid.Column mobile={ 8 } tablet={ 8 } computer={ 10 }>
                         <CopyInputField
-                            value={ oidcConfigurations?.tokenEndpoint }
+                            value={
+                                wellKnownResponse?.issuer ?? oidcConfigurations?.tokenEndpoint
+                            }
                             data-testid={ `${ testId }-introspection-readonly-input` }
                         />
                     </Grid.Column>
@@ -356,6 +361,30 @@ export const OIDCConfigurations: FunctionComponent<OIDCConfigurationsPropsInterf
                             <CopyInputField
                                 value={ oidcConfigurations?.pushedAuthorizationRequestEndpoint }
                                 data-testid={ `${testId}-pushed-authorization-request-readonly-input` } />
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row columns={ 2 }>
+                        <Grid.Column mobile={ 8 } computer={ 6 }>
+                            <GenericIcon
+                                icon={ getHelpPanelIcons().endpoints.token }
+                                size="micro"
+                                square
+                                transparent
+                                inline
+                                className="left-icon"
+                                verticalAlign="middle"
+                                spaced="right"
+                            />
+                            <label data-testid={ `${testId}-ciba-label` }>
+                                { t("applications:helpPanel.tabs.start.content." +
+                                    "oidcConfigurations.labels.backchannelAuthentication") }
+                            </label>
+                        </Grid.Column>
+                        <Grid.Column mobile={ 8 } computer={ 10 }>
+                            <CopyInputField
+                                value={ oidcConfigurations?.cibaEndpoint }
+                                data-componentid={ `${testId}-ciba-readonly-input` }
+                            />
                         </Grid.Column>
                     </Grid.Row></>
                 ) }

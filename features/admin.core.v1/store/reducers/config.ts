@@ -261,7 +261,10 @@ export const commonConfigReducerInitialState: CommonConfigReducerStateInterface<
                 users: null
             },
             flowExecution: {
-                enableLegacyFlows: true
+                enableLegacyFlows: true,
+                enableLegacyInvitedUserRegistrationFlow: true,
+                enableLegacyPasswordRecoveryFlow: true,
+                enableLegacySelfRegistrationFlow: true
             },
             googleOneTapEnabledTenants: [],
             gravatarConfig: {
@@ -310,6 +313,7 @@ export const commonConfigReducerInitialState: CommonConfigReducerStateInterface<
             isLeftNavigationCategorized: undefined,
             isMarketingConsentBannerEnabled: undefined,
             isPasswordInputValidationEnabled: undefined,
+            isPasswordResetEnforcementScopeEnabled: undefined,
             isRequestPathAuthenticationEnabled: undefined,
             isSAASDeployment: undefined,
             isSignatureValidationCertificateAliasEnabled: undefined,

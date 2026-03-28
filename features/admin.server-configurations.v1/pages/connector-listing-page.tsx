@@ -18,7 +18,7 @@
 
 import Typography from "@oxygen-ui/react/Typography";
 import { FeatureStatus, useCheckFeatureStatus, useRequiredScopes } from "@wso2is/access-control";
-import useEnableLegacyFlows from "@wso2is/admin.core.v1/hooks/use-enable-legacy-flows";
+import useEnableLegacyFlows, { LegacyFlowType } from "@wso2is/admin.core.v1/hooks/use-enable-legacy-flows";
 import useUIConfig from "@wso2is/admin.core.v1/hooks/use-ui-configs";
 import { FeatureConfigInterface } from "@wso2is/admin.core.v1/models/config";
 import { AppState, store } from "@wso2is/admin.core.v1/store";
@@ -27,7 +27,9 @@ import FeatureFlagConstants from "@wso2is/admin.feature-gate.v1/constants/featur
 import { useGetCurrentOrganizationType } from "@wso2is/admin.organizations.v1/hooks/use-get-organization-type";
 import { IdentityAppsApiException } from "@wso2is/core/exceptions";
 import { isFeatureEnabled } from "@wso2is/core/helpers";
-import { AlertLevels, ReferableComponentInterface, TestableComponentInterface } from "@wso2is/core/models";
+import { AlertLevels, ReferableComponentInterface, TestableComponentInterface,
+    HttpErrorResponseDataInterface
+} from "@wso2is/core/models";
 import { addAlert } from "@wso2is/core/store";
 import { I18n } from "@wso2is/i18n";
 import { PageLayout } from "@wso2is/react-components";
@@ -88,7 +90,10 @@ export const ConnectorListingPage: FunctionComponent<ConnectorListingPageInterfa
     const { UIConfig } = useUIConfig();
 
     const featureConfig: FeatureConfigInterface = useSelector((state: AppState) => state.config.ui.features);
-    const isLegacyFlowsEnabled: boolean = useEnableLegacyFlows();
+    const isLegacySelfRegistrationEnabled: boolean = useEnableLegacyFlows(LegacyFlowType.SELF_REGISTRATION);
+    const isLegacyInvitedUserRegistrationEnabled: boolean =
+        useEnableLegacyFlows(LegacyFlowType.INVITED_USER_REGISTRATION);
+    const isLegacyPasswordRecoveryEnabled: boolean = useEnableLegacyFlows(LegacyFlowType.PASSWORD_RECOVERY);
     const allowedScopes: string = useSelector((state: AppState) => state?.auth?.allowedScopes);
     const isPasswordInputValidationEnabled: boolean = useSelector((state: AppState) =>
         state?.config?.ui?.isPasswordInputValidationEnabled);
@@ -150,8 +155,21 @@ export const ConnectorListingPage: FunctionComponent<ConnectorListingPageInterfa
                     return false;
                 }
 
-                if (!isLegacyFlowsEnabled && LEGACY_ONLY_CONNECTOR_IDS.includes(connector.id)) {
-                    return false;
+                if (LEGACY_ONLY_CONNECTOR_IDS.includes(connector.id)) {
+                    if (connector.id === ServerConfigurationsConstants.PASSWORD_RECOVERY
+                        && !isLegacyPasswordRecoveryEnabled) {
+                        return false;
+                    }
+
+                    if (connector.id === ServerConfigurationsConstants.SELF_SIGN_UP_CONNECTOR_ID
+                        && !isLegacySelfRegistrationEnabled) {
+                        return false;
+                    }
+
+                    if (connector.id === ServerConfigurationsConstants.ASK_PASSWORD_CONNECTOR_ID
+                        && !isLegacyInvitedUserRegistrationEnabled) {
+                        return false;
+                    }
                 }
 
                 if (connector.id === ServerConfigurationsConstants.SESSION_MANAGEMENT_CONNECTOR_ID
@@ -166,7 +184,15 @@ export const ConnectorListingPage: FunctionComponent<ConnectorListingPageInterfa
         }
 
         return refinedConnectorCategories;
-    }, [ featureConfig, UIConfig, allowedScopes, isSubOrgResidentOutboundProvisioningEnabled ]);
+    }, [
+        featureConfig,
+        UIConfig,
+        allowedScopes,
+        isLegacyInvitedUserRegistrationEnabled,
+        isLegacyPasswordRecoveryEnabled,
+        isLegacySelfRegistrationEnabled,
+        isSubOrgResidentOutboundProvisioningEnabled
+    ]);
 
     const [
         dynamicConnectorCategories,
@@ -201,7 +227,7 @@ export const ConnectorListingPage: FunctionComponent<ConnectorListingPageInterfa
 
                 setDynamicConnectorCategories(connectorCategoryArray);
             })
-            .catch((error: AxiosError) => {
+            .catch((error: AxiosError<HttpErrorResponseDataInterface>) => {
                 if (error.response && error.response.data && error.response.data.detail) {
                     store.dispatch(addAlert({
                         description: I18n.instance.t("governanceConnectors:notifications." +
