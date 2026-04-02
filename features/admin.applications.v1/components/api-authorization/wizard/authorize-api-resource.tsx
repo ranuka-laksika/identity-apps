@@ -117,6 +117,11 @@ export const AuthorizeAPIResource: FunctionComponent<AuthorizeAPIResourcePropsIn
             ApplicationFeatureDictionaryKeys.ApplicationEditEnforceAuthorizedAPIUpdatePermission)
     );
 
+    const isUnifiedMcpCapabilitiesEnabled: boolean = isFeatureEnabled(
+        applicationFeatureConfig,
+        ApplicationManagementConstants.FEATURE_DICTIONARY.get("APPLICATION_UNIFIED_MCP_CAPABILITIES")
+    );
+
     const hasInternalAPIResourceAuthorizationPermission: boolean = useRequiredScopes(
         applicationFeatureConfig?.subFeatures?.applicationInternalAPIAuthorization?.scopes?.update);
     const hasBusinessAPIResourceAuthorizationPermission: boolean = useRequiredScopes(
@@ -533,11 +538,19 @@ export const AuthorizeAPIResource: FunctionComponent<AuthorizeAPIResourcePropsIn
                                                 return item?.type === APIResourceCategories.VC;
                                             }
 
-                                            // For all other apps, show MCP, API Resources (Tenant, Organization, Business)
-                                            return item?.type === APIResourceCategories.MCP ||
-                                                item?.type === APIResourceCategories.TENANT ||
-                                                item?.type === APIResourceCategories.ORGANIZATION ||
-                                                item?.type === APIResourceCategories.BUSINESS;
+                                            // When unified MCP capabilities is enabled: all apps can access MCP servers
+                                            // When disabled: only MCP client apps can access MCP servers
+                                            if (isUnifiedMcpCapabilitiesEnabled || isMCPClient) {
+                                                return item?.type === APIResourceCategories.MCP ||
+                                                    item?.type === APIResourceCategories.TENANT ||
+                                                    item?.type === APIResourceCategories.ORGANIZATION ||
+                                                    item?.type === APIResourceCategories.BUSINESS;
+                                            } else {
+                                                // For other apps when flag is disabled: show only standard API resources
+                                                return item?.type === APIResourceCategories.TENANT ||
+                                                    item?.type === APIResourceCategories.ORGANIZATION ||
+                                                    item?.type === APIResourceCategories.BUSINESS;
+                                            }
                                         }).sort((a: DropdownItemProps, b: DropdownItemProps) =>
                                             APIResourceUtils.sortApiResourceTypes(a, b)
                                         )
