@@ -1,5 +1,37 @@
 # @wso2is/myaccount
 
+## 3.0.7
+
+### Patch Changes
+
+- [#9957](https://github.com/wso2/identity-apps/pull/9957) [`9d864e0c4d739af7817b80813214e5a2d8256957`](https://github.com/wso2/identity-apps/commit/9d864e0c4d739af7817b80813214e5a2d8256957) Thanks [@sadilchamishka](https://github.com/sadilchamishka)! - Multiple email & mobile number display improvement
+
+## 3.0.6
+
+### Patch Changes
+
+- [#9988](https://github.com/wso2/identity-apps/pull/9988) [`a4fe66d4e346222b0762577c80c5137a1acf7d1e`](https://github.com/wso2/identity-apps/commit/a4fe66d4e346222b0762577c80c5137a1acf7d1e) Thanks [@sadilchamishka](https://github.com/sadilchamishka)! - Approval task filtering by operation type and request ID UI
+
+- Updated dependencies [[`a4fe66d4e346222b0762577c80c5137a1acf7d1e`](https://github.com/wso2/identity-apps/commit/a4fe66d4e346222b0762577c80c5137a1acf7d1e)]:
+  - @wso2is/common.workflow-approvals.v1@1.0.15
+  - @wso2is/i18n@2.38.2
+
+## 3.0.5
+
+### Patch Changes
+
+- [#10000](https://github.com/wso2/identity-apps/pull/10000) [`e1fae599a1c54a534d60355375fed04fea4621ca`](https://github.com/wso2/identity-apps/commit/e1fae599a1c54a534d60355375fed04fea4621ca) Thanks [@RavindiFernando](https://github.com/RavindiFernando)! - Axios and SDK version bumps and Type error fixes
+
+## 3.0.4
+
+### Patch Changes
+
+- [#9898](https://github.com/wso2/identity-apps/pull/9898) [`8ba669268e37c2c75809ba5cbbde403538540b0f`](https://github.com/wso2/identity-apps/commit/8ba669268e37c2c75809ba5cbbde403538540b0f) Thanks [@NutharaNR](https://github.com/NutharaNR)! - Modify pendingEmails call to honour to complex attribute type
+
+- Updated dependencies [[`8ba669268e37c2c75809ba5cbbde403538540b0f`](https://github.com/wso2/identity-apps/commit/8ba669268e37c2c75809ba5cbbde403538540b0f), [`51d4c127b2aae10e8dbf5d16800fbd20f562458b`](https://github.com/wso2/identity-apps/commit/51d4c127b2aae10e8dbf5d16800fbd20f562458b)]:
+  - @wso2is/common.users.v1@1.0.8
+  - @wso2is/i18n@2.37.9
+
 ## 3.0.3
 
 ### Patch Changes

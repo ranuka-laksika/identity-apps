@@ -1764,7 +1764,9 @@ export const extensions: Extensions = {
                 validations: {
                     required: "This field cannot be empty",
                     portInvalid: "The port number is invalid",
-                    emailInvalid: "The email address is invalid"
+                    emailInvalid: "The email address is invalid",
+                    bodyExceedsMaxLength: "Payload template exceeds the maximum allowed length.",
+                    scopesExceedsMaxLength: "Scopes value exceeds the maximum allowed length."
                 }
             },
             notifications: {

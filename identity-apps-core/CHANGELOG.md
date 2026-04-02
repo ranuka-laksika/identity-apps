@@ -1,5 +1,49 @@
 # @wso2is/identity-apps-core
 
+## 4.0.8
+
+### Patch Changes
+
+- [#9967](https://github.com/wso2/identity-apps/pull/9967) [`543d61f8a556172a691c652dc728afcf69b9837a`](https://github.com/wso2/identity-apps/commit/543d61f8a556172a691c652dc728afcf69b9837a) Thanks [@Sithumli](https://github.com/Sithumli)! - Update passkey instruction messages to be device-agnostic for better UX on mobile devices
+
+## 4.0.7
+
+### Patch Changes
+
+- [#10025](https://github.com/wso2/identity-apps/pull/10025) [`2f1e747825ac6578760c606df24b7a3b4c627a47`](https://github.com/wso2/identity-apps/commit/2f1e747825ac6578760c606df24b7a3b4c627a47) Thanks [@DilshanSenarath](https://github.com/DilshanSenarath)! - Fix the issue with the X.509 authenticator error page.
+
+## 4.0.6
+
+### Patch Changes
+
+- [#10000](https://github.com/wso2/identity-apps/pull/10000) [`e1fae599a1c54a534d60355375fed04fea4621ca`](https://github.com/wso2/identity-apps/commit/e1fae599a1c54a534d60355375fed04fea4621ca) Thanks [@RavindiFernando](https://github.com/RavindiFernando)! - Axios and SDK version bumps and Type error fixes
+
+## 4.0.5
+
+### Patch Changes
+
+- [#9976](https://github.com/wso2/identity-apps/pull/9976) [`31ac345af1a1fe32272db7d0443a2fc14c5f9830`](https://github.com/wso2/identity-apps/commit/31ac345af1a1fe32272db7d0443a2fc14c5f9830) Thanks [@HasiniSama](https://github.com/HasiniSama)! - Fix JSP compilation errors in user-not-found.jsp causing 404 on new user Google sign-in
+
+* [#9985](https://github.com/wso2/identity-apps/pull/9985) [`41963ef8b50dbd6f6404c7995e7dac56c22ac473`](https://github.com/wso2/identity-apps/commit/41963ef8b50dbd6f6404c7995e7dac56c22ac473) Thanks [@HimashaHerath](https://github.com/HimashaHerath)! - Fix double HTML encoding of error messages in x509 certificate error page
+
+## 4.0.4
+
+### Patch Changes
+
+- [#9962](https://github.com/wso2/identity-apps/pull/9962) [`daf105e2780b356759d8a8be5c0a895522363e5c`](https://github.com/wso2/identity-apps/commit/daf105e2780b356759d8a8be5c0a895522363e5c) Thanks [@DilshanSenarath](https://github.com/DilshanSenarath)! - Add the cache-prevention filter for forward requests
+
+## 4.0.3
+
+### Patch Changes
+
+- [#9953](https://github.com/wso2/identity-apps/pull/9953) [`a527ed748c33de141a84a9f21657bc7cbac30ace`](https://github.com/wso2/identity-apps/commit/a527ed748c33de141a84a9f21657bc7cbac30ace) Thanks [@DilshanSenarath](https://github.com/DilshanSenarath)! - Fix pattern issue in cache prevention filter
+
+## 4.0.2
+
+### Patch Changes
+
+- [#9843](https://github.com/wso2/identity-apps/pull/9843) [`ea7227c798abbff52cbf69d4f6e91d38426b6651`](https://github.com/wso2/identity-apps/commit/ea7227c798abbff52cbf69d4f6e91d38426b6651) Thanks [@SujanSanjula96](https://github.com/SujanSanjula96)! - Hide enable enhanced org authentication toggle in my account and add backend validations for system apps
+
 ## 4.0.1
 
 ### Patch Changes

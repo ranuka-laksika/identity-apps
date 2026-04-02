@@ -24,7 +24,9 @@ import {
     IdentityProviderInterface,
     IdentityProviderListResponseInterface
 } from "@wso2is/admin.identity-providers.v1/models/identity-provider";
-import { AlertLevels, IdentifiableComponentInterface, TestableComponentInterface } from "@wso2is/core/models";
+import { AlertLevels, IdentifiableComponentInterface, TestableComponentInterface,
+    HttpErrorResponseDataInterface
+} from "@wso2is/core/models";
 import { addAlert } from "@wso2is/core/store";
 import {
     ConfirmationModal,
@@ -35,7 +37,7 @@ import {
 } from "@wso2is/react-components";
 import { AxiosError } from "axios";
 import React, { FunctionComponent, MouseEvent, ReactElement, useEffect, useState } from "react";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import { Dispatch } from "redux";
 import { AccordionTitleProps, Divider, Grid, Icon, Segment } from "semantic-ui-react";
@@ -149,7 +151,7 @@ export const OutboundProvisioningConfiguration: FunctionComponent<OutboundProvis
 
                 onUpdate(application.id);
             })
-            .catch((error: AxiosError) => {
+            .catch((error: AxiosError<HttpErrorResponseDataInterface>) => {
                 if (error.response && error.response.data && error.response.data.description) {
                     dispatch(addAlert({
                         description: error.response.data.description,
@@ -250,7 +252,7 @@ export const OutboundProvisioningConfiguration: FunctionComponent<OutboundProvis
                 onUpdate(application.id);
                 setShowDeleteConfirmationModal(false);
             })
-            .catch((error: AxiosError) => {
+            .catch((error: AxiosError<HttpErrorResponseDataInterface>) => {
 
                 if (error.response && error.response.data && error.response.data.description) {
                     dispatch(setAlert({
@@ -407,23 +409,11 @@ export const OutboundProvisioningConfiguration: FunctionComponent<OutboundProvis
                         onClose={ (): void => setShowDeleteConfirmationModal(false) }
                         type="negative"
                         open={ showDeleteConfirmationModal }
-                        assertion={ deletingIdp?.idp }
-                        assertionHint={ (
-                            <p>
-                                <Trans
-                                    i18nKey={
-                                        "applications:confirmations" +
-                                        ".deleteOutboundProvisioningIDP.assertionHint"
-                                    }
-                                    tOptions={ { name: deletingIdp?.idp } }
-                                >
-                                    Please type <strong>{ deletingIdp?.idp }</strong> to confirm.
-                                </Trans>
-                            </p>
-                        ) }
-                        assertionType="input"
-                        primaryAction="Confirm"
-                        secondaryAction="Cancel"
+                        assertionHint={ t("applications:confirmations" +
+                            ".deleteOutboundProvisioningIDP.assertionHint") }
+                        assertionType="checkbox"
+                        primaryAction={ t("common:confirm") }
+                        secondaryAction={ t("common:cancel") }
                         onSecondaryActionClick={ (): void => {
                             setShowDeleteConfirmationModal(false);
                             setAlert(null);

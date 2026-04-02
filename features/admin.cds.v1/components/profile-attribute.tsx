@@ -21,7 +21,9 @@ import IconButton from "@oxygen-ui/react/IconButton";
 import { TrashIcon } from "@oxygen-ui/react-icons";
 import { AppConstants } from "@wso2is/admin.core.v1/constants/app-constants";
 import { history } from "@wso2is/admin.core.v1/helpers/history";
-import { AlertLevels } from "@wso2is/core/models";
+import { AlertLevels,
+    HttpErrorResponseDataInterface
+} from "@wso2is/core/models";
 import { addAlert } from "@wso2is/core/store";
 import { Field, Form } from "@wso2is/form";
 import { DynamicField, KeyValue } from "@wso2is/forms";
@@ -78,6 +80,7 @@ interface CanonicalValues {
 }
 
 interface AttributeFormValues {
+    display_name: string;
     value_type: ValueType;
     merge_strategy: MergeStrategy;
     multi_valued: boolean;
@@ -203,6 +206,7 @@ const ProfileAttributeEditPage: FunctionComponent<RouteComponentProps<RouteParam
         const payload: Partial<ProfileSchemaAttribute> = {
             attribute_name: attribute.attribute_name,
             canonical_values: canonicalValues as CanonicalValues[],
+            ...(values.display_name ? { display_name: values.display_name } : {}),
             merge_strategy: values.merge_strategy,
             multi_valued: Boolean(values.multi_valued),
             mutability: isIdentityScope ? attribute.mutability : values.mutability,
@@ -226,7 +230,7 @@ const ProfileAttributeEditPage: FunctionComponent<RouteComponentProps<RouteParam
                 // truth for canonical_values — its response is what the useEffect re-seeds from.
                 mutate();
             })
-            .catch((err: AxiosError): void => {
+            .catch((err: AxiosError<HttpErrorResponseDataInterface>): void => {
                 dispatch(addAlert({
                     description: err?.message || t("customerDataService:profileAttributes.edit.notifications" +
                         ".updateAttribute.error.description"),
@@ -254,7 +258,7 @@ const ProfileAttributeEditPage: FunctionComponent<RouteComponentProps<RouteParam
 
             history.push(AppConstants.getPaths().get("PROFILE_ATTRIBUTES"));
         } catch (err: unknown) {
-            const axiosErr: AxiosError = err as AxiosError;
+            const axiosErr: AxiosError<HttpErrorResponseDataInterface> = err as AxiosError<HttpErrorResponseDataInterface>;
 
             setModalAlert({
                 description: axiosErr?.message || t("customerDataService:profileAttributes.edit.notifications" +
@@ -342,6 +346,7 @@ const ProfileAttributeEditPage: FunctionComponent<RouteComponentProps<RouteParam
                         uncontrolledForm={ true }
                         onSubmit={ (values: AttributeFormValues) => handleUpdate(values) }
                         initialValues={ {
+                            display_name: attribute.display_name ?? "",
                             merge_strategy: attribute.merge_strategy,
                             multi_valued: Boolean(attribute.multi_valued),
                             mutability: (attribute.mutability as Mutability) ?? "readWrite",
@@ -381,6 +386,29 @@ const ProfileAttributeEditPage: FunctionComponent<RouteComponentProps<RouteParam
                                     />
                                     <Hint>
                                         { t("customerDataService:profileAttributes.edit.fields.attribute.hint") }
+                                    </Hint>
+                                </Grid.Column>
+                            </Grid.Row>
+
+                            { /* Display name */ }
+                            <Grid.Row columns={ 1 }>
+                                <Grid.Column mobile={ 16 } tablet={ 16 } computer={ 16 }>
+                                    <Field.Input
+                                        ariaLabel="Display name"
+                                        inputType="default"
+                                        name="display_name"
+                                        label={ t("customerDataService:profileAttributes.edit.fields." +
+                                            "displayName.label") }
+                                        placeholder={ t("customerDataService:profileAttributes.edit." +
+                                            "fields.displayName.placeholder") }
+                                        readOnly={ isIdentityScope }
+                                        maxLength={ 200 }
+                                        minLength={ 0 }
+                                        data-componentid={ `${componentId}-display-name-input` }
+                                        width={ 16 }
+                                    />
+                                    <Hint>
+                                        { t("customerDataService:profileAttributes.edit.fields.displayName.hint") }
                                     </Hint>
                                 </Grid.Column>
                             </Grid.Row>

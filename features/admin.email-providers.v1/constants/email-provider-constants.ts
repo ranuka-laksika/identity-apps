@@ -79,7 +79,8 @@ export class EmailProviderConstants {
     public static readonly EMAIL_PROVIDER_CONFIG_FIELD_MIN_LENGTH: number = 0;
     public static readonly EMAIL_PROVIDER_CONFIG_FIELD_MAX_LENGTH: number = 255;
     public static readonly EMAIL_PROVIDER_SERVER_PORT_MAX_LENGTH: number = 6;
-    public static readonly HTTP_PROVIDER_BODY_MAX_LENGTH: number = 2048;
+    public static readonly HTTP_PROVIDER_BODY_MAX_LENGTH: number = 1023;
+    public static readonly HTTP_PROVIDER_SCOPES_MAX_LENGTH: number = 1023;
     public static readonly EMAIL_REGEX: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     public static ErrorMessages: {

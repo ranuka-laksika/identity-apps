@@ -1,5 +1,14 @@
 # @wso2is/admin.verifiable-credentials.v1
 
+## 1.0.6
+
+### Patch Changes
+
+- [#9868](https://github.com/wso2/identity-apps/pull/9868) [`ccc16fdc100015581b5c7574b6b6561924a02fff`](https://github.com/wso2/identity-apps/commit/ccc16fdc100015581b5c7574b6b6561924a02fff) Thanks [@shashimalcse](https://github.com/shashimalcse)! - Fix Inconsistent spacing in VC template creation wizard
+
+- Updated dependencies []:
+  - @wso2is/admin.core.v1@2.55.6
+
 ## 1.0.5
 
 ### Patch Changes

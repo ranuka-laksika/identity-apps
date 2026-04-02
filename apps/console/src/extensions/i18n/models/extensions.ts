@@ -1658,6 +1658,8 @@ export interface Extensions {
                     required: string;
                     portInvalid: string;
                     emailInvalid: string;
+                    bodyExceedsMaxLength: string;
+                    scopesExceedsMaxLength: string;
                 };
             }
             notifications: {

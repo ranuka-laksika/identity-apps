@@ -285,6 +285,16 @@ export const approvalWorkflows: approvalWorkflowsNS = {
         updateDelay: {
             description: "It might take some time for the updated properties to appear.",
             message: "Updating properties takes time"
+        },
+        updateRuleConfiguration: {
+            genericError: {
+                description: "An error occurred while updating the rule configuration.",
+                message: "Rule update failed"
+            },
+            success: {
+                description: "The rule configuration has been updated successfully.",
+                message: "Rule updated successfully!"
+            }
         }
     },
     pageLayout: {
@@ -328,7 +338,7 @@ export const approvalWorkflows: approvalWorkflowsNS = {
                 },
                 step2: {
                     description: "Select the operations that would trigger this approval workflow and configure rule conditions.",
-                    hint: "This approval workflow will be triggered when any of the selected operations are initiated.",
+                    hint: "This approval workflow is triggered for selected operations based on configured rules, and always triggers if no rules are defined.",
                     title:  "Workflow Operation Details"
                 },
                 step3: {

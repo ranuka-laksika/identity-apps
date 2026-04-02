@@ -126,6 +126,14 @@ const EmailProvidersPage: FunctionComponent<EmailProvidersPageInterface> = (
     const enableOldUIForEmailProvider: boolean = useSelector(
         (state: AppState) => state?.config?.ui?.enableOldUIForEmailProvider);
 
+    const scopesMaxLength: number = useSelector(
+        (state: AppState) => state?.config?.ui?.httpEmailProviderScopesMaxLength
+    ) ?? EmailProviderConstants.HTTP_PROVIDER_SCOPES_MAX_LENGTH;
+
+    const bodyMaxLength: number = useSelector(
+        (state: AppState) => state?.config?.ui?.httpEmailProviderBodyMaxLength
+    ) ?? EmailProviderConstants.HTTP_PROVIDER_BODY_MAX_LENGTH;
+
     const {
         data: originalEmailProviderConfig,
         isLoading: isEmailProviderConfigFetchRequestLoading,
@@ -743,6 +751,8 @@ const EmailProvidersPage: FunctionComponent<EmailProvidersPageInterface> = (
             }
             if (!values?.body) {
                 error.body = t("extensions:develop.emailProviders.form.validations.required");
+            } else if (values.body.length > bodyMaxLength) {
+                error.body = t("extensions:develop.emailProviders.form.validations.bodyExceedsMaxLength");
             }
             if (!values?.authType) {
                 error.authType = t("extensions:develop.emailProviders.form.validations.required");
@@ -764,6 +774,9 @@ const EmailProvidersPage: FunctionComponent<EmailProvidersPageInterface> = (
                 }
                 if (!values?.tokenEndpoint) {
                     error.tokenEndpoint = t("extensions:develop.emailProviders.form.validations.required");
+                }
+                if (values?.scopes && values.scopes.length > scopesMaxLength) {
+                    error.scopes = t("extensions:develop.emailProviders.form.validations.scopesExceedsMaxLength");
                 }
             }
             if (values?.authType === AuthType.BEARER) {

@@ -139,6 +139,9 @@ export const common: CommonNS = {
             selfRegistration: "自助注册",
             unassignedUsersDeleted: "未分配的用户已被删除。"
         },
+        "search": {
+            "placeholder": "按请求 ID 搜索"
+        },
         "subTitle": "查看需要您批准的操作任务",
         "title": "批准"
     },

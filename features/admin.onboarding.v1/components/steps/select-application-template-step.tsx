@@ -19,16 +19,14 @@
 import { Theme, styled } from "@mui/material/styles";
 import Box from "@oxygen-ui/react/Box";
 import Divider from "@oxygen-ui/react/Divider";
-import Link from "@oxygen-ui/react/Link";
-import Typography from "@oxygen-ui/react/Typography";
 import { IdentifiableComponentInterface } from "@wso2is/core/models";
-import React, { FunctionComponent, ReactElement, useCallback, useEffect, useState } from "react";
+import React, { FunctionComponent, ReactElement, useCallback, useEffect } from "react";
 import {
     APPLICATION_TYPE_OPTIONS,
     FRAMEWORK_OPTIONS,
     OnboardingComponentIds
 } from "../../constants";
-import { ApplicationTypeOptionInterface, FrameworkOptionInterface } from "../../models";
+import { ApplicationTypeOptionInterface, FrameworkOptionInterface } from "../../models/application";
 import { LeftColumn, SectionLabel, TwoColumnLayout } from "../shared/onboarding-styles";
 import SelectableCard from "../shared/selectable-card";
 import StepHeader from "../shared/step-header";
@@ -48,7 +46,7 @@ const FrameworkGrid: typeof Box = styled(Box)(({ theme }: { theme: Theme }) => (
 const AppTypeGrid: typeof Box = styled(Box)(({ theme }: { theme: Theme }) => ({
     display: "grid",
     gap: theme.spacing(2),
-    gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))"
+    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))"
 }));
 
 /**
@@ -73,19 +71,9 @@ const SelectApplicationTemplateStep: FunctionComponent<SelectApplicationTemplate
         ["data-componentid"]: componentId = OnboardingComponentIds.SELECT_APPLICATION_TEMPLATE_STEP
     } = props;
 
-    const [ showMoreFrameworks, setShowMoreFrameworks ] = useState<boolean>(false);
-    const [ showMoreAppTypes, setShowMoreAppTypes ] = useState<boolean>(false);
+    const visibleFrameworks: readonly FrameworkOptionInterface[] = FRAMEWORK_OPTIONS;
 
-    const DEFAULT_FRAMEWORK_COUNT: number = 5;
-    const DEFAULT_APP_TYPE_COUNT: number = 3;
-
-    const visibleFrameworks: readonly FrameworkOptionInterface[] = showMoreFrameworks
-        ? FRAMEWORK_OPTIONS
-        : FRAMEWORK_OPTIONS.slice(0, DEFAULT_FRAMEWORK_COUNT);
-
-    const visibleAppTypes: readonly ApplicationTypeOptionInterface[] = showMoreAppTypes
-        ? APPLICATION_TYPE_OPTIONS
-        : APPLICATION_TYPE_OPTIONS.slice(0, DEFAULT_APP_TYPE_COUNT);
+    const visibleAppTypes: readonly ApplicationTypeOptionInterface[] = APPLICATION_TYPE_OPTIONS;
 
     useEffect(() => {
         if (!selectedTemplateId && !selectedFramework && FRAMEWORK_OPTIONS.length > 0) {
@@ -118,9 +106,9 @@ const SelectApplicationTemplateStep: FunctionComponent<SelectApplicationTemplate
                 />
 
                 { /* Framework Selection Section */ }
-                <Box>
+                <Box sx={ { display: "flex", flexDirection: "column", gap: 1.5 } }>
                     <SectionLabel>
-                        Select by framework
+                        Select by technology
                     </SectionLabel>
 
                     <FrameworkGrid>
@@ -145,44 +133,13 @@ const SelectApplicationTemplateStep: FunctionComponent<SelectApplicationTemplate
                             />
                         )) }
 
-                        { FRAMEWORK_OPTIONS.length > DEFAULT_FRAMEWORK_COUNT && (
-                            <Link
-                                component="button"
-                                onClick={ () => setShowMoreFrameworks(!showMoreFrameworks) }
-                                sx={ {
-                                    "&:hover": {
-                                        textDecoration: "underline"
-                                    },
-                                    color: "primary.main",
-                                    cursor: "pointer",
-                                    fontSize: "0.875rem",
-                                    fontWeight: 500,
-                                    textDecoration: "none",
-                                    whiteSpace: "nowrap"
-                                } }
-                                data-componentid={ `${componentId}-show-more-frameworks` }
-                            >
-                                { showMoreFrameworks ? "Show less" : "Show more" }
-                            </Link>
-                        ) }
                     </FrameworkGrid>
                 </Box>
 
-                <Divider textAlign="left" sx={ { my: 3 } }>
-                    <Typography
-                        variant="body2"
-                        sx={ {
-                            color: "text.secondary",
-                            fontSize: "1rem",
-                            fontWeight: 500
-                        } }
-                    >
-                        or
-                    </Typography>
-                </Divider>
+                <Divider textAlign="left" sx={ { my: 3 } } />
 
                 { /* Application Type Selection Section */ }
-                <Box>
+                <Box sx={ { display: "flex", flexDirection: "column", gap: 1.5 } }>
                     <SectionLabel>
                         Select by application type
                     </SectionLabel>
@@ -204,26 +161,6 @@ const SelectApplicationTemplateStep: FunctionComponent<SelectApplicationTemplate
                             />
                         )) }
 
-                        { APPLICATION_TYPE_OPTIONS.length > DEFAULT_APP_TYPE_COUNT && (
-                            <Link
-                                component="button"
-                                onClick={ () => setShowMoreAppTypes(!showMoreAppTypes) }
-                                sx={ {
-                                    "&:hover": {
-                                        textDecoration: "underline"
-                                    },
-                                    color: "primary.main",
-                                    cursor: "pointer",
-                                    fontSize: "0.875rem",
-                                    fontWeight: 500,
-                                    justifySelf: "start",
-                                    textDecoration: "none"
-                                } }
-                                data-componentid={ `${componentId}-show-more-apptypes` }
-                            >
-                                { showMoreAppTypes ? "Show less" : "Show more" }
-                            </Link>
-                        ) }
                     </AppTypeGrid>
                 </Box>
             </LeftColumn>

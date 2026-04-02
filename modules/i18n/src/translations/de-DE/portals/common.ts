@@ -136,8 +136,11 @@ export const common: CommonNS = {
         "propertyMessages": {
             "assignedUsersDeleted": "Die zugewiesenen Benutzer wurden gelöscht.",
             "roleDeleted": "Die Rolle wurde gelöscht.",
-            "selfRegistration": "Self Registration",
+            "selfRegistration": "Selbstregistrierung",
             "unassignedUsersDeleted": "Die nicht zugewiesenen Benutzer wurden gelöscht."
+        },
+        "search": {
+            "placeholder": "Nach Anforderungs-ID suchen"
         },
         "subTitle": "Überprüfen Sie die betrieblichen Aufgaben, die Ihre Genehmigung erfordern",
         "title": "Genehmigungen"

@@ -480,6 +480,8 @@ export class Config {
             hiddenOutboundProvisioningConnectors:
                 window[ "AppUtils" ]?.getConfig()?.ui?.hiddenOutboundProvisioningConnectors ?? [],
             hiddenUserStores: window[ "AppUtils" ]?.getConfig()?.ui?.hiddenUserStores,
+            httpEmailProviderBodyMaxLength: window[ "AppUtils" ]?.getConfig()?.ui?.httpEmailProviderBodyMaxLength,
+            httpEmailProviderScopesMaxLength: window[ "AppUtils" ]?.getConfig()?.ui?.httpEmailProviderScopesMaxLength,
             i18nConfigs: window[ "AppUtils" ]?.getConfig()?.ui?.i18nConfigs,
             identityProviderTemplates: window[ "AppUtils" ]?.getConfig()?.ui?.identityProviderTemplates,
             isClaimUniquenessValidationEnabled:

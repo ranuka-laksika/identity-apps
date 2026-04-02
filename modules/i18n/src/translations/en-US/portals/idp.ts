@@ -160,6 +160,9 @@ export const idp: IdpNS = {
                     label: "Secondary lookup attribute",
                     placeholder: "No attributes are selected"
                 },
+                nonUniqueClaimWarning: "This claim is not unique across the userstores. " +
+                    "To avoid missing the implicit association, " +
+                    "please make this claim a unique one across the userstores.",
                 warning: "Ensure that the selected attributes are verified by the token issuer"
             }
         },
@@ -1081,7 +1084,7 @@ export const idp: IdpNS = {
             header: "Fill the basic information about the provisioning connector.",
             steps: {
                 connectorConfiguration: {
-                    title: "Connector Details"
+                    title: "Configuration"
                 },
                 connectorSelection: {
                     defaultSetup: {

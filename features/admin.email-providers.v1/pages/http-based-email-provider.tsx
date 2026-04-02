@@ -521,7 +521,6 @@ const HttpBasedEmailProvider: FunctionComponent<HttpBasedEmailProviderPageInterf
                                                 "authenticationTypeDropdown.authProperties.scopes.placeholder"
                                             ) }
                                             component={ TextFieldAdapter }
-                                            maxLength={ 500 }
                                             readOnly={ isReadOnly }
                                         />
                                     </>

@@ -22,7 +22,7 @@ import {
     ServerConfigurationsConstants
 } from "@wso2is/admin.server-configurations.v1/constants/server-configurations-constants";
 import { IdentityAppsApiException } from "@wso2is/core/exceptions";
-import { SignInIdentifiersConfigInterface } from "../models";
+import { SignInIdentifiersConfigInterface } from "../models/sign-in-options";
 
 /**
  * Enables multi-attribute login (email/mobile) at the organization level

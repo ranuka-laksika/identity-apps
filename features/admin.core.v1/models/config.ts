@@ -75,6 +75,17 @@ interface ConnectionConfigInterface extends FeatureAccessConfigInterface {
 }
 
 /**
+ * Extended feature config for onboarding with deployment-specific fields.
+ */
+export interface OnboardingFeatureConfigInterface extends FeatureAccessConfigInterface {
+    /**
+     * Cutoff date (YYYY-MM-DD) for determining whether a user is "new".
+     * Users with SCIM2 meta.created on or after this date are considered new.
+     */
+    featureDeployedDate?: string;
+}
+
+/**
  * Application configuration interface.
  */
 export interface FeatureConfigInterface {
@@ -141,7 +152,7 @@ export interface FeatureConfigInterface {
     /**
      * Onboarding wizard feature.
      */
-    onboarding?: FeatureAccessConfigInterface;
+    onboarding?: OnboardingFeatureConfigInterface;
     /**
      * SMS providers feature.
      */
@@ -246,6 +257,10 @@ export interface FeatureConfigInterface {
      * Secret Management Feature UI Access Scopes.
      */
     secretsManagement?: FeatureAccessConfigInterface;
+    /**
+     * Tenant management feature.
+     */
+    tenants?: FeatureAccessConfigInterface;
     /**
      * Try It feature
      */
@@ -556,6 +571,17 @@ export interface UIConfigInterface extends CommonUIConfigInterface<FeatureConfig
      * Enable old UI of email provider.
      */
     enableOldUIForEmailProvider: boolean;
+    /**
+     * Maximum character length for the OAuth scopes field in the HTTP-based email provider.
+     * Defaults to 1023 to match the default database column size. Configurable to support
+     * deployments with a different column length.
+     */
+    httpEmailProviderScopesMaxLength?: number;
+    /**
+     * Maximum character length for the body field in the HTTP-based email provider.
+     * Defaults to 1023. Configurable to support deployments with a different column length.
+     */
+    httpEmailProviderBodyMaxLength?: number;
     /**
      * Enable/Disable custom email template feature
      */

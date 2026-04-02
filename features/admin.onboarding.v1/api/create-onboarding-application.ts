@@ -33,7 +33,8 @@ import OIDCWebAppTemplate
 import SPATemplate from "@wso2is/admin.extensions.v1/application-templates/templates/single-page-application/single-page-application.json";
 import { IdentityAppsApiException } from "@wso2is/core/exceptions";
 import { buildAuthSequence } from "./auth-sequence-builder";
-import { CreatedApplicationResultInterface, OnboardingDataInterface } from "../models";
+import { CreatedApplicationResultInterface } from "../models/application";
+import { OnboardingDataInterface } from "../models/onboarding";
 import { extractOrigins } from "../utils/url-utils";
 
 /**

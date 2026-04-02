@@ -276,6 +276,8 @@ export const commonConfigReducerInitialState: CommonConfigReducerStateInterface<
             hiddenConnectionTemplates: [],
             hiddenOutboundProvisioningConnectors: [],
             hiddenUserStores: [],
+            httpEmailProviderBodyMaxLength: undefined,
+            httpEmailProviderScopesMaxLength: undefined,
             i18nConfigs: null,
             identityProviderTemplates: {
                 apple: {

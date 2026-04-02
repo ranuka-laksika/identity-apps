@@ -29,7 +29,8 @@ on:
 
 # Prevent multiple concurrent runs of this workflow. New runs will be queued.
 concurrency:
-    group: release
+    # This creates a unique group for every branch.
+    group: ${{ github.workflow }}-${{ github.ref_name }}
     cancel-in-progress: false
 
 env:

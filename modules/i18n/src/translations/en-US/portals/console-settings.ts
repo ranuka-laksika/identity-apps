@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024, WSO2 LLC. (https://www.wso2.com).
+ * Copyright (c) 2024-2026, WSO2 LLC. (https://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -31,6 +31,11 @@ export const consoleSettings: ConsoleSettingsNS = {
                 addExistingUser: "Add Existing User",
                 addExternalUser: "Invite Admins to Asgardeo",
                 inviteParentUser: "Invite Parent User"
+            },
+            wizard: {
+                users: {
+                    moreItemsMessage: "Only the recent users are listed. Type to search for others ..."
+                }
             }
         },
         edit: {

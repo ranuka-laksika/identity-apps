@@ -160,6 +160,10 @@ export const user: userNS = {
                         }
                     }
                 },
+                roleAudience: {
+                    application: "application/{{appName}}",
+                    organization: "organization"
+                },
                 roleAvailabilityInfo: "Only roles that are already available in the child organizations will be assigned to the shared user.",
                 searchAvailableRolesPlaceholder: "Search available roles",
                 shareAllRoles: "Assign all roles",

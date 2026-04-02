@@ -140,7 +140,7 @@ const NotificationDetailsForm: ForwardRefExoticComponent<RefAttributes<Notificat
                     <div className="notification-channels">
                         { /* Approver Notifications */ }
                         <div className="notification-config">
-                            <Heading as="h6" className="sub-heading">
+                            <Heading as="h6">
                                 { t("approvalWorkflows:forms.notifications.approver.label") }
                             </Heading>
                             <FormGroup className="fields">
@@ -167,7 +167,7 @@ const NotificationDetailsForm: ForwardRefExoticComponent<RefAttributes<Notificat
                         </div>
                         { /* Initiator Notifications */ }
                         <div className="notification-config">
-                            <Heading as="h6" className="sub-heading">
+                            <Heading as="h6">
                                 { t("approvalWorkflows:forms.notifications.initiator.label") }
                             </Heading>
                             <FormGroup className="fields">

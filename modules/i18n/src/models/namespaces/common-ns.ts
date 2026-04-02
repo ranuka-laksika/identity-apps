@@ -128,6 +128,9 @@ export interface CommonNS {
                 };
                 searchApprovals: string;
             };
+        search: {
+            placeholder: string;
+        };
         subTitle: string;
         modals: {
             header: string;

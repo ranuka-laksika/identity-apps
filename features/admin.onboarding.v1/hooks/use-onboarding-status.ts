@@ -16,12 +16,15 @@
  * under the License.
  */
 
+import { useApplicationList } from "@wso2is/admin.applications.v1/api/application";
+import { ApplicationListInterface } from "@wso2is/admin.applications.v1/models/application";
 import { FeatureConfigInterface } from "@wso2is/admin.core.v1/models/config";
 import { AppState } from "@wso2is/admin.core.v1/store";
 import {
     useGetCurrentOrganizationType
 } from "@wso2is/admin.organizations.v1/hooks/use-get-organization-type";
 import { useUsersList } from "@wso2is/admin.users.v1/api/users";
+import { UserAccountTypes } from "@wso2is/admin.users.v1/constants/user-management-constants";
 import { ProfileConstants } from "@wso2is/core/constants";
 import { FeatureAccessConfigInterface } from "@wso2is/core/models";
 import { useCallback, useMemo, useState } from "react";
@@ -33,6 +36,7 @@ import { parseOnboardingShowFromPreferences } from "../utils/parse-onboarding-pr
  * SCIM2 attributes to request from the Users list endpoint.
  */
 const SCIM_ATTRIBUTES: string = [
+    "userName",
     `${ProfileConstants.SCIM2_SYSTEM_USER_SCHEMA}.userAccountType`,
     `${ProfileConstants.SCIM2_SYSTEM_USER_SCHEMA}.userPreferences`
 ].join(",");
@@ -41,9 +45,11 @@ const SCIM_ATTRIBUTES: string = [
  * Return type for the useOnboardingStatus hook.
  */
 interface UseOnboardingStatusReturn {
+    isFirstWizardRun: boolean;
     isLoading: boolean;
     markOnboardingComplete: () => Promise<void>;
     shouldShowOnboarding: boolean;
+    userAccountType: string | null;
 }
 
 /**
@@ -93,17 +99,47 @@ export const useOnboardingStatus = (): UseOnboardingStatusReturn => {
     const userAccountType: string | null =
         (systemSchemaData?.userAccountType as string) ?? null;
 
+    const isOwner: boolean = userAccountType === UserAccountTypes.OWNER;
+
+    // For owners, fetch applications (excluding system portals) to check if any exist.
+    const {
+        data: appListData,
+        isLoading: isAppListLoading
+    } = useApplicationList<ApplicationListInterface>(
+        null,
+        1,
+        0,
+        null,
+        shouldFetch && isOwner,
+        true
+    );
+
+    const ownerHasNoApps: boolean = useMemo((): boolean => {
+        if (!isOwner || !appListData) {
+            return true;
+        }
+
+        return (appListData.totalResults ?? 0) === 0;
+    }, [ isOwner, appListData ]);
+
     const shouldShowOnboarding: boolean = useMemo((): boolean => {
         if (isDismissed || !shouldFetch || !currentUser) {
             return false;
         }
 
-        return parseOnboardingShowFromPreferences(
+        const hasPreference: boolean = parseOnboardingShowFromPreferences(
             systemSchemaData?.userPreferences as string | undefined
         );
-    }, [ isDismissed, shouldFetch, currentUser, systemSchemaData ]);
 
-    const isLoading: boolean = !featureConfig || (shouldFetch && isUserListLoading);
+        if (isOwner) {
+            return hasPreference && ownerHasNoApps;
+        }
+
+        return hasPreference;
+    }, [ isDismissed, shouldFetch, currentUser, systemSchemaData, isOwner, ownerHasNoApps ]);
+
+    const isLoading: boolean =
+        !featureConfig || (shouldFetch && (isUserListLoading || (isOwner && isAppListLoading)));
 
     const markOnboardingComplete: () => Promise<void> = useCallback(
         async (): Promise<void> => {
@@ -122,9 +158,22 @@ export const useOnboardingStatus = (): UseOnboardingStatusReturn => {
         [ userAccountType, scimUserId ]
     );
 
+    // True when the user has never completed or skipped the wizard (SCIM2 userPreferences).
+    const isFirstWizardRun: boolean = useMemo((): boolean => {
+        if (!currentUser) {
+            return true;
+        }
+
+        return parseOnboardingShowFromPreferences(
+            systemSchemaData?.userPreferences as string | undefined
+        );
+    }, [ currentUser, systemSchemaData ]);
+
     return {
+        isFirstWizardRun,
         isLoading,
         markOnboardingComplete,
-        shouldShowOnboarding
+        shouldShowOnboarding,
+        userAccountType
     };
 };

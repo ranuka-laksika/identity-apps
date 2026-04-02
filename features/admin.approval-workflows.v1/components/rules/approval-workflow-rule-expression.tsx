@@ -26,6 +26,7 @@ import FormHelperText from "@oxygen-ui/react/FormHelperText";
 import MenuItem from "@oxygen-ui/react/MenuItem";
 import Select, { SelectChangeEvent } from "@oxygen-ui/react/Select";
 import { MinusIcon, PlusIcon } from "@oxygen-ui/react-icons";
+import { RoleAudienceTypes } from "@wso2is/admin.roles.v2/constants/role-constants";
 import { useRulesContext } from "@wso2is/admin.rules.v1/hooks/use-rules-context";
 import {
     ConditionExpressionMetaInterface,
@@ -46,6 +47,7 @@ import React, {
 import { Trans, useTranslation } from "react-i18next";
 import WorkflowClaimSelector, { WorkflowClaimOptionInterface } from "./workflow-claim-selector";
 import WorkflowConditionValueInput from "./workflow-condition-value-input";
+import { APPROVAL_WORKFLOW_RULE_FIELDS } from "../../constants/approval-workflow-constants";
 import {
     WorkflowClaimFieldGroupInterface,
     WorkflowClaimGroupFieldType,
@@ -144,7 +146,11 @@ const ApprovalWorkflowRuleExpression: FunctionComponent<ApprovalWorkflowRuleExpr
         return [ ...baseFieldOptions, ...workflowClaimFieldOptions ];
     }, [ conditionExpressionsMeta, hidden?.conditions, workflowClaimMetaGroups ]);
 
-    const showValueError: boolean = submissionAttempted && !expression.value?.trim();
+    const showValueError: boolean = submissionAttempted && (
+        !expression.value?.trim() ||
+        (expression.field === APPROVAL_WORKFLOW_RULE_FIELDS.ROLE_AUDIENCE &&
+            expression.value === RoleAudienceTypes.APPLICATION)
+    );
 
     const findMetaValuesAgainst: ConditionExpressionMetaInterface = conditionExpressionsMeta.find(
         (expressionMeta: ConditionExpressionMetaInterface) => expressionMeta?.field?.name === expression.field
@@ -304,7 +310,8 @@ const ApprovalWorkflowRuleExpression: FunctionComponent<ApprovalWorkflowRuleExpr
                     readonly={ isReadonly }
                     showValidationError={ showValueError }
                 />
-                { showValueError && (
+                { showValueError &&
+                    findMetaValuesAgainst?.field?.name !== APPROVAL_WORKFLOW_RULE_FIELDS.ROLE_AUDIENCE && (
                     <FormHelperText>
                         { t("approvalWorkflows:pageLayout.create.ruleConditions.fields.valueRequired") }
                     </FormHelperText>

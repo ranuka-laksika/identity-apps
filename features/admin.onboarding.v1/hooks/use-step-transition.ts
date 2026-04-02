@@ -17,7 +17,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { OnboardingStep } from "../models";
+import { OnboardingStep } from "../models/onboarding";
 
 /**
  * Duration of each transition phase (exit and enter) in milliseconds.

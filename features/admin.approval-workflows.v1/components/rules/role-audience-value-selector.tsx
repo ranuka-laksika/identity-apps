@@ -22,6 +22,7 @@ import Autocomplete, {
 import Box from "@oxygen-ui/react/Box";
 import CircularProgress from "@oxygen-ui/react/CircularProgress";
 import FormControl from "@oxygen-ui/react/FormControl";
+import FormHelperText from "@oxygen-ui/react/FormHelperText";
 import MenuItem from "@oxygen-ui/react/MenuItem";
 import Select, { SelectChangeEvent } from "@oxygen-ui/react/Select";
 import TextField from "@oxygen-ui/react/TextField";
@@ -171,6 +172,10 @@ const RoleAudienceValueSelector: FunctionComponent<RoleAudienceValueSelectorProp
         expressionValue !== RoleAudienceTypes.APPLICATION &&
         expressionValue !== organizationId;
 
+    const showAudienceTypeError: boolean = showValidationError && !audienceType;
+    const showApplicationError: boolean = showValidationError &&
+        audienceType === RoleAudienceTypes.APPLICATION && !isRealAppId;
+
     /**
      * Validate the selected application still exists by fetching its details.
      * If the fetch fails (e.g., 404), the resource is considered missing.
@@ -309,12 +314,12 @@ const RoleAudienceValueSelector: FunctionComponent<RoleAudienceValueSelectorProp
     return (
         <Box data-componentid={ componentId }>
             { /* Audience type selector: Organization or Application */ }
-            <FormControl fullWidth size="small">
+            <FormControl fullWidth size="small" error={ showAudienceTypeError }>
                 <Select
                     disabled={ isReadonly }
                     value={ audienceType ?? "" }
                     displayEmpty
-                    error={ showValidationError }
+                    error={ showAudienceTypeError }
                     data-componentid={ `${componentId}-audience-type-select` }
                     MenuProps={ {
                         disablePortal: false,
@@ -348,11 +353,14 @@ const RoleAudienceValueSelector: FunctionComponent<RoleAudienceValueSelectorProp
                         { t("roles:addRoleWizard.forms.roleBasicDetails.roleAudience.values.application") }
                     </MenuItem>
                 </Select>
+                { showAudienceTypeError && (
+                    <FormHelperText>
+                        { t("approvalWorkflows:pageLayout.create.ruleConditions.fields.valueRequired") }
+                    </FormHelperText>
+                ) }
             </FormControl>
-
-            { /* Conditional application selector */ }
             { audienceType === RoleAudienceTypes.APPLICATION && (
-                <FormControl fullWidth size="small" sx={ { mt: 1 } }>
+                <FormControl fullWidth size="small" sx={ { mt: 1 } } error={ showApplicationError }>
                     <Autocomplete
                         className="autocomplete"
                         disabled={ isReadonly }
@@ -419,6 +427,7 @@ const RoleAudienceValueSelector: FunctionComponent<RoleAudienceValueSelectorProp
                             <TextField
                                 { ...params }
                                 variant="outlined"
+                                error={ showApplicationError }
                                 placeholder={ t("rules:fields.autocomplete.placeholderText") }
                                 InputProps={ {
                                     ...params.InputProps,
@@ -456,6 +465,11 @@ const RoleAudienceValueSelector: FunctionComponent<RoleAudienceValueSelectorProp
                             );
                         } }
                     />
+                    { showApplicationError && (
+                        <FormHelperText>
+                            { t("approvalWorkflows:pageLayout.create.ruleConditions.fields.valueRequired") }
+                        </FormHelperText>
+                    ) }
                 </FormControl>
             ) }
         </Box>

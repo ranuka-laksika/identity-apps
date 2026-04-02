@@ -18,7 +18,7 @@
 
 import { addUser } from "@wso2is/admin.users.v1/api/users";
 import { UserDetailsInterface } from "@wso2is/admin.users.v1/models/user";
-import { TestUserCredentialsInterface } from "../models";
+import { TestUserCredentialsInterface } from "../models/application";
 import { generateSecurePassword } from "../utils/password-generator";
 
 /**

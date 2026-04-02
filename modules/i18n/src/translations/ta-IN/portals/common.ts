@@ -139,6 +139,9 @@ export const common: CommonNS = {
             selfRegistration: "சுய பதிவு",
             unassignedUsersDeleted: "ஒதுக்கப்படாத பயனர்/கள் நீக்கப்பட்டுள்ளன."
         },
+        search: {
+            placeholder: "கோரிக்கை ஐடி மூலம் தேடு"
+        },
         subTitle: "உங்கள் அங்கீகாரத்தைத் தேவைப்படும் செயல்பாட்டு பணிகளைப் பரிசீலிக்கவும்",
         title: "அனுமதிகள்"
     },

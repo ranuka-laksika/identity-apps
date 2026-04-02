@@ -29,6 +29,11 @@
     },
     "docSiteUrl": "https://is.docs.wso2.com/en/latest",
     "extensions": {
+        "analytics": {
+            "moesif": {
+                "applicationId": ""
+            }
+        },
         "defaultBrandedLoginScreenCopyright": "${copyright} ${year} WSO2 LLC.",
         "emailTemplates": [
             {
@@ -233,7 +238,11 @@
                 "displayName": "Password Set Success",
                 "id": "YXNrUGFzc3dvcmRTZXRTdWNjZXNz"
             }
-        ]
+        ],
+        "trial": {
+            "enabled": false,
+            "tierName": "Paid"
+        }
     },
     "getProfileInfoFromIDToken": false,
     "i18nResourcePath": "",
@@ -1372,6 +1381,7 @@
             "onboarding": {
                 "disabledFeatures": [],
                 "enabled": false,
+                "featureDeployedDate": "",
                 "featureFlags": [],
                 "scopes": {
                     "create": [
@@ -2094,6 +2104,8 @@
             "swe-idp"
         ],
         "hiddenUserStores": [],
+        "httpEmailProviderBodyMaxLength": 1023,
+        "httpEmailProviderScopesMaxLength": 1023,
         "i18nConfigs": {
             "langAutoDetectEnabled": false,
             "showLanguageSwitcher": false

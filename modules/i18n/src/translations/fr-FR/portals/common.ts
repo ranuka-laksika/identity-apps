@@ -139,6 +139,9 @@ export const common: CommonNS = {
             selfRegistration: "Auto-enregistrement",
             unassignedUsersDeleted: "Les utilisateurs non assignés ont été supprimés."
         },
+        search: {
+            placeholder: "Rechercher par ID de demande"
+        },
         subTitle: "Examinez les tâches opérationnelles nécessitant votre approbation",
         title: "Approbations"
     },

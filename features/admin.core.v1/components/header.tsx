@@ -49,6 +49,7 @@ import { OrganizationSwitchBreadcrumb } from "@wso2is/admin.organizations.v1/com
 import { useGetCurrentOrganizationType } from "@wso2is/admin.organizations.v1/hooks/use-get-organization-type";
 import useOrganizations from "@wso2is/admin.organizations.v1/hooks/use-organizations";
 import useSubscription, { UseSubscriptionInterface } from "@wso2is/admin.subscription.v1/hooks/use-subscription";
+import { useTrialDetails } from "@wso2is/admin.subscription.v1/hooks/use-trial-details";
 import { TenantTier } from "@wso2is/admin.subscription.v1/models/tenant-tier";
 import useRuntimeConfig from "@wso2is/common.ui.v1/hooks/use-runtime-config";
 import { resolveAppLogoFilePath } from "@wso2is/core/helpers";
@@ -141,6 +142,7 @@ const Header: FunctionComponent<HeaderPropsInterface> = ({
 
     const saasFeatureStatus: FeatureStatus = useCheckFeatureStatus(FeatureGateConstants.SAAS_FEATURES_IDENTIFIER);
     const { tierName }: UseSubscriptionInterface = useSubscription();
+    const { tenantHasTrial } = useTrialDetails();
 
     const { organizationType, isSubOrganization } = useGetCurrentOrganizationType();
 
@@ -435,7 +437,7 @@ const Header: FunctionComponent<HeaderPropsInterface> = ({
                 </Menu>
             </>
         ),
-        tierName === TenantTier.FREE &&
+        (tierName === TenantTier.FREE || tenantHasTrial) &&
             billingPortalURL &&
             !isPrivilegedUser &&
             window["AppUtils"].getConfig().extensions.upgradeButtonEnabled && (

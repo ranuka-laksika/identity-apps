@@ -85,6 +85,10 @@ export const SharedAccess: FunctionComponent<SharedAccessPropsInterface> = (
     const isEnhancedOrganizationAuthenticationFeatureEnabled: boolean = useSelector((state: AppState) =>
         state?.config?.ui?.isEnhancedOrganizationAuthenticationFeatureEnabled);
 
+    const isMyAccount: boolean =
+        ApplicationManagementConstants.MY_ACCOUNT_CLIENT_ID === application?.clientId ||
+        ApplicationManagementConstants.MY_ACCOUNT_APP_NAME === application?.name;
+
     const statusToi18nKeyMap: Map<OperationStatus, { alertLevel: AlertLevels, i18nKey: string }> =
         new Map<OperationStatus, { alertLevel: AlertLevels, i18nKey: string }>([
             [ OperationStatus.SUCCESS, { alertLevel: AlertLevels.SUCCESS, i18nKey: "success" } ],
@@ -155,7 +159,7 @@ export const SharedAccess: FunctionComponent<SharedAccessPropsInterface> = (
                         )
                 }
             </EmphasizedSegment>
-            { isEnhancedOrganizationAuthenticationFeatureEnabled && (
+            { isEnhancedOrganizationAuthenticationFeatureEnabled && !isMyAccount && (
                 <EnhancedOrganizationLoginToggle
                     appId={ application.id }
                     isEnabled={ application.enhancedOrgAuthenticationEnabled ?? false }

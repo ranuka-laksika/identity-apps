@@ -139,6 +139,9 @@ export const common: CommonNS = {
             selfRegistration: "自己登録",
             unassignedUsersDeleted: "割り当てられていないユーザー/sは削除されています。"
         },
+        search: {
+            placeholder: "リクエストIDで検索"
+        },
         "subTitle": "承認を必要とする運用タスクを確認します",
         "title": "承認"
     },

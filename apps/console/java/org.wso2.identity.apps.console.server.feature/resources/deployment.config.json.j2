@@ -2018,6 +2018,7 @@
                 "enabled": {% if console.onboarding.enabled is defined %} {{ console.onboarding.enabled }},
                 {% else %} true,
                 {% endif %}
+                "featureDeployedDate": "{% if console.onboarding.feature_deployed_date is defined %}{{ console.onboarding.feature_deployed_date }}{% endif %}",
                 "scopes": {
                     {% if console.onboarding.scopes is defined %}
                     {% for operation, scopes in console.onboarding.scopes.items() %}
@@ -2668,6 +2669,16 @@
             "enableOldUIForEmailProvider": {{ console.ui.enable_old_ui_for_email_provider }},
         {% else %}
             "enableOldUIForEmailProvider": false,
+        {% endif %}
+        {% if console.ui.http_email_provider_body_max_length is defined %}
+            "httpEmailProviderBodyMaxLength": {{ console.ui.http_email_provider_body_max_length }},
+        {% else %}
+            "httpEmailProviderBodyMaxLength": 1023,
+        {% endif %}
+        {% if console.ui.http_email_provider_scopes_max_length is defined %}
+            "httpEmailProviderScopesMaxLength": {{ console.ui.http_email_provider_scopes_max_length }},
+        {% else %}
+            "httpEmailProviderScopesMaxLength": 1023,
         {% endif %}
         {% if console.ui.enable_legacy_locale_dropdown is defined %}
             "enableLegacyLocaleDropdown": {{ console.ui.enable_legacy_locale_dropdown }},

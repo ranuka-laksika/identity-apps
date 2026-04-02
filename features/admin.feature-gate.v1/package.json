@@ -35,7 +35,7 @@
         "@wso2is/admin.organizations.v1": "^2.28.2",
         "@wso2is/access-control": "^3.5.3",
         "@wso2is/core": "^2.12.10",
-        "axios": "^0.19.2",
+        "axios": "^1.7.0",
         "i18next": "^21.9.1",
         "react-helmet": "^5.2.1",
         "react-i18next": "^11.18.5",

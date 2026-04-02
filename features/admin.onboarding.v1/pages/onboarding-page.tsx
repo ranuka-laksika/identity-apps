@@ -32,7 +32,7 @@ import Header from "../components/shared/header";
 import { ContentArea } from "../components/shared/onboarding-styles";
 import { OnboardingComponentIds } from "../constants";
 import { useOnboardingStatus } from "../hooks/use-onboarding-status";
-import { OnboardingDataInterface, ParsedWizardUrlParamsInterface } from "../models";
+import { OnboardingDataInterface, ParsedWizardUrlParamsInterface } from "../models/onboarding";
 import { parseWizardUrlParams } from "../utils/parse-wizard-url-params";
 
 /**
@@ -74,9 +74,11 @@ const OnboardingPage: FunctionComponent<OnboardingPageProps> = (props: Onboardin
     const isIntentionalAccess: boolean = isIntentionalAccessRef.current;
 
     const {
+        isFirstWizardRun,
         shouldShowOnboarding,
         isLoading,
-        markOnboardingComplete
+        markOnboardingComplete,
+        userAccountType
     } = useOnboardingStatus();
 
     const featureConfig: FeatureConfigInterface = useSelector(
@@ -149,9 +151,11 @@ const OnboardingPage: FunctionComponent<OnboardingPageProps> = (props: Onboardin
                     data-componentid={ `${componentId}-wizard` }
                     initialData={ initialData }
                     initialStep={ initialStep }
+                    isFirstWizardRun={ isFirstWizardRun }
                     isReturningUser={ isIntentionalAccess }
                     onComplete={ handleComplete }
                     onSkip={ handleSkip }
+                    userAccountType={ userAccountType }
                 />
             </ContentArea>
         </StyledOnboardingPage>

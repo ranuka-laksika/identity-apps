@@ -28,6 +28,7 @@ import ESLintPlugin from "eslint-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import JsonMinimizerPlugin from "json-minimizer-webpack-plugin";
+import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
 import webpack, {
     Configuration,
     RuleSetRule,
@@ -465,6 +466,14 @@ module.exports = (config: WebpackOptionsNormalized, context: NxWebpackContextInt
         })
     );
 
+    // Bundle only the required monaco editor languages.
+    config.plugins.push(
+        new MonacoWebpackPlugin({
+            filename: "monaco-workers/[name].worker.js",
+            languages: [ "javascript", "json", "typescript", "html", "xml", "shell" ]
+        })
+    );
+
     // Update the existing `DefinePlugin` plugin added by NX.
     const existingDefinePlugin: WebpackPluginInstance =
         config.plugins.find((plugin: WebpackPluginInstance) => {
@@ -600,6 +609,8 @@ module.exports = (config: WebpackOptionsNormalized, context: NxWebpackContextInt
     ];
 
     config.module.rules.unshift({
+        // Exclude monaco editor related files to avoid duplicate packing of worker.js files.
+        exclude: /node_modules[\\/]monaco-editor[\\/]/,
         test: /\.worker\.(ts|js)$/,
         use: {
             loader: "worker-loader",
@@ -677,6 +688,13 @@ module.exports = (config: WebpackOptionsNormalized, context: NxWebpackContextInt
                     name: "codemirror",
                     priority: 20,
                     test: /[\\/]node_modules[\\/](codemirror|js-beautify)[\\/]/
+                },
+                monaco: {
+                    chunks: "all",
+                    enforce: true,
+                    name: "monaco",
+                    priority: 30,
+                    test: /[\\/]node_modules[\\/](monaco-editor|@monaco-editor)[\\/]/
                 },
                 vendor: {
                     chunks: "initial",

@@ -30,6 +30,12 @@ import {
 import { AppConstants } from "@wso2is/admin.core.v1/constants/app-constants";
 import { history } from "@wso2is/admin.core.v1/helpers/history";
 import { AppState } from "@wso2is/admin.core.v1/store";
+import {
+    updateGovernanceConnector
+} from "@wso2is/admin.server-configurations.v1/api/governance-connectors";
+import {
+    ServerConfigurationsConstants
+} from "@wso2is/admin.server-configurations.v1/constants/server-configurations-constants";
 import useGetExtensionTemplates from "@wso2is/admin.template-core.v1/api/use-get-extension-templates";
 import { ExtensionTemplateListInterface, ResourceTypes } from "@wso2is/admin.template-core.v1/models/templates";
 import { resolveUserDisplayName } from "@wso2is/core/helpers";
@@ -46,6 +52,7 @@ import {
     SecondaryButton,
     StepTransitionWrapper
 } from "./shared/onboarding-styles";
+import ProgressStepper from "./shared/progress-stepper";
 import ConfigureRedirectUrlStep from "./steps/configure-redirect-url-step";
 import DesignLoginStep from "./steps/design-login-step";
 import NameApplicationStep from "./steps/name-application-step";
@@ -60,17 +67,22 @@ import {
     DEFAULT_BRANDING_CONFIG,
     DEFAULT_SIGN_IN_OPTIONS,
     OnboardingComponentIds,
-    RANDOM_NAME_COUNT
+    OnboardingStepNames,
+    RANDOM_NAME_COUNT,
+    STEP_NAMES,
+    getDefaultRedirectUrl
 } from "../constants";
+import { useOnboardingAnalytics } from "../hooks/use-onboarding-analytics";
 import { useOnboardingDataInterface, useStepValidation } from "../hooks/use-onboarding-validation";
+import { useStepProgress } from "../hooks/use-step-progress";
 import { useStepTransition } from "../hooks/use-step-transition";
 import { useWizardUrlSync } from "../hooks/use-wizard-url-sync";
+import { CreatedApplicationResultInterface } from "../models/application";
+import { OnboardingChoice, OnboardingDataInterface, OnboardingStep } from "../models/onboarding";
 import {
-    CreatedApplicationResultInterface,
-    OnboardingChoice,
-    OnboardingDataInterface,
-    OnboardingStep
-} from "../models";
+    SignInIdentifiersConfigInterface,
+    SignInLoginMethodsConfigInterface
+} from "../models/sign-in-options";
 import { generateRandomNames } from "../utils/random-name-generator";
 
 /**
@@ -79,9 +91,11 @@ import { generateRandomNames } from "../utils/random-name-generator";
 export interface OnboardingWizardPropsInterface extends IdentifiableComponentInterface {
     initialData?: OnboardingDataInterface;
     initialStep?: OnboardingStep;
+    isFirstWizardRun?: boolean;
     isReturningUser?: boolean;
     onComplete: (data: OnboardingDataInterface) => Promise<void>;
     onSkip: () => Promise<void>;
+    userAccountType?: string | null;
 }
 
 /**
@@ -210,6 +224,9 @@ const getNextButtonText = (currentStep: OnboardingStep, data: OnboardingDataInte
     const isM2M: boolean = data.templateId === ApplicationTemplateIdTypes.M2M_APPLICATION;
 
     switch (currentStep) {
+        case OnboardingStep.WELCOME:
+            return "Let's go!";
+
         case OnboardingStep.SELECT_APPLICATION_TEMPLATE:
 
             if (isM2M) {
@@ -243,6 +260,7 @@ const OnboardingWizard: FunctionComponent<OnboardingWizardPropsInterface> = (
         isReturningUser = false,
         onComplete,
         onSkip,
+        userAccountType = null,
         ["data-componentid"]: componentId = OnboardingComponentIds.WIZARD
     } = props;
 
@@ -295,6 +313,7 @@ const OnboardingWizard: FunctionComponent<OnboardingWizardPropsInterface> = (
         updateBrandingConfig,
         updateChoice,
         updateRedirectUrls,
+        updateSelfRegistration,
         updateSignInOptions,
         updateTemplateSelection
     } = useOnboardingDataInterface(onboardingData, setOnboardingDataInterface);
@@ -302,7 +321,29 @@ const OnboardingWizard: FunctionComponent<OnboardingWizardPropsInterface> = (
     // Sync wizard state to URL query parameters
     useWizardUrlSync(currentStep, onboardingData);
 
+    // Analytics tracking
+    const {
+        trackCompleted,
+        trackSkipped,
+        trackStarted,
+        trackStepBack,
+        trackStepCompleted
+    } = useOnboardingAnalytics({ currentStep, isReturningUser, onboardingData, userAccountType });
+
+    // Fire Onboarding-Started event on mount
+    useEffect(() => {
+        trackStarted();
+    }, []);
+
     const isNextDisabled: boolean = useStepValidation(currentStep, onboardingData);
+
+    // Progress stepper state - uses visibleStep so it updates in sync with transitions
+    const {
+        currentStepIndex: progressStepIndex,
+        isVisible: showProgressStepper,
+        steps: progressSteps,
+        totalSteps: progressTotalSteps
+    } = useStepProgress(visibleStep, onboardingData);
 
     const isM2M: boolean = useMemo(
         () => onboardingData.templateId === ApplicationTemplateIdTypes.M2M_APPLICATION,
@@ -377,6 +418,30 @@ const OnboardingWizard: FunctionComponent<OnboardingWizardPropsInterface> = (
                 }
             }
 
+            // Update self-registration org-wide setting if the user changed it
+            if (onboardingData.selfRegistrationEnabled !== undefined) {
+                try {
+                    await updateGovernanceConnector(
+                        {
+                            operation: "UPDATE",
+                            properties: [ {
+                                name: ServerConfigurationsConstants.SELF_REGISTRATION_ENABLE,
+                                value: String(onboardingData.selfRegistrationEnabled)
+                            } ]
+                        },
+                        ServerConfigurationsConstants.USER_ONBOARDING_CONNECTOR_ID,
+                        ServerConfigurationsConstants.SELF_SIGN_UP_CONNECTOR_ID
+                    );
+                } catch (_selfRegError) {
+                    dispatch(addAlert({
+                        description: "Application created successfully, but the self-registration " +
+                            "setting could not be updated.",
+                        level: AlertLevels.WARNING,
+                        message: "Self-Registration Not Updated"
+                    }));
+                }
+            }
+
             setCreatedApplication(result);
 
             const appName: string = onboardingData.applicationName || "your application";
@@ -426,7 +491,95 @@ const OnboardingWizard: FunctionComponent<OnboardingWizardPropsInterface> = (
     const handleNext: () => Promise<void> = useCallback(async (): Promise<void> => {
         const nextStep: OnboardingStep = getNextStep(currentStep, onboardingData);
 
+        // Fire step-specific analytics events before transitioning
+        switch (currentStep) {
+            case OnboardingStep.WELCOME:
+                trackStepCompleted(OnboardingStep.WELCOME, OnboardingStepNames.WELCOME_OPTION_SELECTED);
+
+                break;
+
+            case OnboardingStep.NAME_APPLICATION:
+                trackStepCompleted(OnboardingStep.NAME_APPLICATION, OnboardingStepNames.APP_NAME_ENTERED);
+
+                break;
+
+            case OnboardingStep.SELECT_APPLICATION_TEMPLATE:
+                trackStepCompleted(
+                    OnboardingStep.SELECT_APPLICATION_TEMPLATE,
+                    OnboardingStepNames.APP_TEMPLATE_SELECTED,
+                    {
+                        app_type: onboardingData.templateId ?? "",
+                        technology_framework: onboardingData.framework ?? ""
+                    }
+                );
+
+                break;
+
+            case OnboardingStep.CONFIGURE_REDIRECT_URL: {
+                const defaultUrls: string[] = getDefaultRedirectUrl(
+                    onboardingData.framework || onboardingData.templateId
+                );
+                const isDefaultRedirectUrl: boolean = defaultUrls.length > 0 &&
+                    JSON.stringify(onboardingData.redirectUrls?.slice().sort()) ===
+                    JSON.stringify(defaultUrls.slice().sort());
+
+                trackStepCompleted(
+                    OnboardingStep.CONFIGURE_REDIRECT_URL,
+                    OnboardingStepNames.REDIRECT_URL_CONFIGURED,
+                    { is_default_value: isDefaultRedirectUrl }
+                );
+
+                break;
+            }
+
+            case OnboardingStep.SIGN_IN_OPTIONS: {
+                const selectedMethods: string[] = [];
+                const identifiers: SignInIdentifiersConfigInterface | undefined =
+                    onboardingData.signInOptions?.identifiers;
+                const loginMethods: SignInLoginMethodsConfigInterface | undefined =
+                    onboardingData.signInOptions?.loginMethods;
+
+                if (identifiers?.username) selectedMethods.push("username");
+                if (identifiers?.email) selectedMethods.push("email");
+                if (identifiers?.mobile) selectedMethods.push("mobile");
+                if (loginMethods?.password) selectedMethods.push("password");
+                if (loginMethods?.passkey) selectedMethods.push("passkey");
+                if (loginMethods?.magicLink) selectedMethods.push("magic_link");
+                if (loginMethods?.emailOtp) selectedMethods.push("email_otp");
+                if (loginMethods?.totp) selectedMethods.push("totp");
+                if (loginMethods?.pushNotification) selectedMethods.push("push_notification");
+
+                trackStepCompleted(
+                    OnboardingStep.SIGN_IN_OPTIONS,
+                    OnboardingStepNames.SIGNIN_OPTIONS_CONFIGURED,
+                    {
+                        self_registration_enabled: onboardingData.selfRegistrationEnabled ?? false,
+                        signin_methods_selected: selectedMethods
+                    }
+                );
+
+                break;
+            }
+
+            case OnboardingStep.DESIGN_LOGIN:
+                trackStepCompleted(
+                    OnboardingStep.DESIGN_LOGIN,
+                    OnboardingStepNames.DESIGN_LOGIN_CONFIGURED,
+                    {
+                        is_default_color:
+                            onboardingData.brandingConfig?.primaryColor === DEFAULT_BRANDING_CONFIG.primaryColor,
+                        is_default_logo: !onboardingData.brandingConfig?.logoUrl
+                    }
+                );
+
+                break;
+
+            default:
+                break;
+        }
+
         if (currentStep === OnboardingStep.SUCCESS) {
+            trackCompleted();
             await onComplete(onboardingData);
         } else if (
             // Create app when clicking Finish from Design Login
@@ -441,18 +594,23 @@ const OnboardingWizard: FunctionComponent<OnboardingWizardPropsInterface> = (
             setDirection("forward");
             setCurrentStep(nextStep);
         }
-    }, [ currentStep, onboardingData, isM2M, createApplication, onComplete ]);
+    }, [
+        currentStep, onboardingData, isM2M, createApplication, onComplete,
+        trackStepCompleted, trackCompleted
+    ]);
 
     const handleBack: () => void = useCallback((): void => {
         const previousStep: OnboardingStep = getPreviousStep(currentStep, onboardingData);
 
+        trackStepBack(currentStep, previousStep);
         setDirection("backward");
         setCurrentStep(previousStep);
-    }, [ currentStep, onboardingData ]);
+    }, [ currentStep, onboardingData, trackStepBack ]);
 
     const handleSkip: () => Promise<void> = useCallback(async (): Promise<void> => {
+        trackSkipped(currentStep, STEP_NAMES[currentStep]);
         await onSkip();
-    }, [ onSkip ]);
+    }, [ onSkip, currentStep, trackSkipped ]);
 
     const isFirstStep: boolean = visibleStep === OnboardingStep.WELCOME;
     const isSuccessStep: boolean = visibleStep === OnboardingStep.SUCCESS;
@@ -468,6 +626,14 @@ const OnboardingWizard: FunctionComponent<OnboardingWizardPropsInterface> = (
     return (
         <>
             <ContentCard data-componentid={ componentId }>
+                { showProgressStepper && (
+                    <ProgressStepper
+                        currentStepIndex={ progressStepIndex }
+                        data-componentid={ `${componentId}-progress-stepper` }
+                        steps={ progressSteps }
+                        totalSteps={ progressTotalSteps }
+                    />
+                ) }
                 <StepTransitionWrapper sx={ transitionStyles }>
                     { visibleStep === OnboardingStep.WELCOME && (
                         <WelcomeStep
@@ -511,7 +677,9 @@ const OnboardingWizard: FunctionComponent<OnboardingWizardPropsInterface> = (
                         <SignInOptionsStep
                             brandingConfig={ onboardingData.brandingConfig }
                             data-componentid={ `${componentId}-sign-in-options` }
+                            onSelfRegistrationChange={ updateSelfRegistration }
                             onSignInOptionsChange={ updateSignInOptions }
+                            selfRegistrationEnabled={ onboardingData.selfRegistrationEnabled }
                             signInOptions={ onboardingData.signInOptions }
                         />
                     ) }
@@ -521,6 +689,7 @@ const OnboardingWizard: FunctionComponent<OnboardingWizardPropsInterface> = (
                             brandingConfig={ onboardingData.brandingConfig }
                             data-componentid={ `${componentId}-design-login` }
                             onBrandingConfigChange={ updateBrandingConfig }
+                            selfRegistrationEnabled={ onboardingData.selfRegistrationEnabled }
                             signInOptions={ onboardingData.signInOptions }
                         />
                     ) }
@@ -534,6 +703,7 @@ const OnboardingWizard: FunctionComponent<OnboardingWizardPropsInterface> = (
                             isM2M={ isM2M }
                             isTourFlow={ isTourFlow }
                             redirectUrls={ onboardingData.redirectUrls }
+                            selfRegistrationEnabled={ onboardingData.selfRegistrationEnabled }
                             signInOptions={ onboardingData.signInOptions }
                             templateId={ onboardingData.templateId }
                         />
@@ -546,6 +716,7 @@ const OnboardingWizard: FunctionComponent<OnboardingWizardPropsInterface> = (
                             data-componentid={ `${componentId}-skip-button` }
                             onClick={ handleSkip }
                             variant="text"
+                            sx={ { fontWeight: 500 } }
                         >
                             { isReturningUser
                                 ? "Back to Console"

@@ -21,7 +21,7 @@ import {
 } from "@wso2is/admin.applications.v1/models/application";
 import { OIDCDataInterface } from "@wso2is/admin.applications.v1/models/application-inbound";
 import set from "lodash-es/set";
-import { CreatedApplicationResultInterface } from "../models";
+import { CreatedApplicationResultInterface } from "../models/application";
 
 /**
  * Parameters for building the onboarding guide data object.

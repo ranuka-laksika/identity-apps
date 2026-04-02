@@ -23,7 +23,7 @@ import ButterflyAvatar from "../../themes/default/assets/images/avatars/butterfl
 import CheetahAvatar from "../../themes/default/assets/images/avatars/cheetah.png";
 import CowAvatar from "../../themes/default/assets/images/avatars/cow.png";
 import CrocodileAvatar from "../../themes/default/assets/images/avatars/crocodile.png";
-import { OnboardingBrandingConfigInterface } from "../models";
+import { OnboardingBrandingConfigInterface } from "../models/branding";
 
 /**
  * Available avatar names for logo suggestions.

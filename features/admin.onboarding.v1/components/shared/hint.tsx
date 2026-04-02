@@ -106,8 +106,7 @@ const ClickableHintMessage: typeof Typography = styled(Typography)(({ theme }: {
 export const HintContent: typeof Box = styled(Box)(({ theme }: { theme: Theme }) => ({
     display: "flex",
     flexWrap: "wrap",
-    gap: theme.spacing(1),
-    marginLeft: theme.spacing(3.25)
+    gap: theme.spacing(1)
 }));
 
 /**

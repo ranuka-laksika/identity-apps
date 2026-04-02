@@ -120,6 +120,16 @@ export interface approvalWorkflowsNS {
             message: string;
             description: string;
         };
+        updateRuleConfiguration: {
+            genericError: {
+                message: string;
+                description: string;
+            };
+            success: {
+                message: string;
+                description: string;
+            };
+        };
     };
     confirmation: {
         hint: string;

@@ -19,7 +19,7 @@
 import {
     LocalAuthenticatorConstants
 } from "@wso2is/admin.connections.v1/constants/local-authenticator-constants";
-import { SignInOptionDefinitionInterface, SignInOptionsConfigInterface } from "../models";
+import { SignInOptionDefinitionInterface, SignInOptionsConfigInterface } from "../models/sign-in-options";
 
 const AuthNames: typeof LocalAuthenticatorConstants.AUTHENTICATOR_NAMES =
     LocalAuthenticatorConstants.AUTHENTICATOR_NAMES;
@@ -184,6 +184,18 @@ export const ALL_SIGN_IN_OPTIONS: SignInOptionDefinitionInterface[] = [
     ...IDENTIFIER_OPTIONS,
     ...LOGIN_METHOD_OPTIONS
 ];
+
+/**
+ * Login method IDs grouped by category for UI rendering.
+ */
+export const PASSWORD_METHOD_IDS: string[] = [ "password" ];
+export const PASSWORDLESS_METHOD_IDS: string[] = [ "passkey", "magicLink" ];
+export const MFA_METHOD_IDS: string[] = [ "emailOtp", "totp", "pushNotification" ];
+
+/**
+ * First-factor method IDs (excluded from Step 2 strip in the login preview).
+ */
+export const FIRST_FACTOR_METHOD_IDS: string[] = [ "password", "passkey", "magicLink" ];
 
 /**
  * Validation rules for sign-in options.

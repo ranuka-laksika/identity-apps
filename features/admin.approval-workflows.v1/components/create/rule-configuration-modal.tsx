@@ -24,6 +24,7 @@ import DialogContent from "@oxygen-ui/react/DialogContent";
 import DialogTitle from "@oxygen-ui/react/DialogTitle";
 import Stack from "@oxygen-ui/react/Stack";
 import Typography from "@oxygen-ui/react/Typography";
+import { RoleAudienceTypes } from "@wso2is/admin.roles.v2/constants/role-constants";
 import useGetRulesMeta from "@wso2is/admin.rules.v1/api/use-get-rules-meta";
 import { useRulesContext } from "@wso2is/admin.rules.v1/hooks/use-rules-context";
 import { ConditionExpressionMetaInterface } from "@wso2is/admin.rules.v1/models/meta";
@@ -36,7 +37,7 @@ import { RulesProvider } from "@wso2is/admin.rules.v1/providers/rules-provider";
 import { AlertLevels, IdentifiableComponentInterface } from "@wso2is/core/models";
 import { addAlert } from "@wso2is/core/store";
 import { ConfirmationModal, ContentLoader } from "@wso2is/react-components";
-import React, { FunctionComponent, ReactElement, useMemo, useState } from "react";
+import React, { FunctionComponent, ReactElement, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import { Dispatch } from "redux";
@@ -44,7 +45,11 @@ import {
     addWorkflowAssociation,
     updateWorkflowAssociationById
 } from "../../api/workflow-associations";
-import { FLOW_TYPE, OPERATION_FIELD_MAPPING } from "../../constants/approval-workflow-constants";
+import {
+    APPROVAL_WORKFLOW_RULE_FIELDS,
+    FLOW_TYPE,
+    OPERATION_FIELD_MAPPING
+} from "../../constants/approval-workflow-constants";
 import { DropdownPropsInterface } from "../../models/ui";
 import { WorkflowAssociationPayload } from "../../models/workflow-associations";
 import {
@@ -153,6 +158,14 @@ const RuleConfigurationModalContent: FunctionComponent<RuleConfigurationModalCon
     const [ isSubmitting, setIsSubmitting ] = useState<boolean>(false);
     const [ submissionAttempted, setSubmissionAttempted ] = useState<boolean>(false);
 
+    // Reset validation state when the user modifies any rule field,
+    // so errors only reappear on the next submission attempt.
+    useEffect(() => {
+        if (submissionAttempted) {
+            setSubmissionAttempted(false);
+        }
+    }, [ ruleInstance ]);
+
     /**
      * Handles saving the configured rule.
      * In create mode: saves locally. In edit mode: persists to backend.
@@ -165,7 +178,10 @@ const RuleConfigurationModalContent: FunctionComponent<RuleConfigurationModalCon
         const hasEmptyExpressionValues: boolean = !!(rule?.rules?.some(
             (condition: RuleConditionWithoutIdInterface) =>
                 condition.expressions?.some(
-                    (expr: ConditionExpressionWithoutIdInterface) => !expr.value?.trim()
+                    (expr: ConditionExpressionWithoutIdInterface) =>
+                        !expr.value?.trim() ||
+                        (expr.field === APPROVAL_WORKFLOW_RULE_FIELDS.ROLE_AUDIENCE &&
+                            expr.value === RoleAudienceTypes.APPLICATION)
                 )
         ));
 
@@ -200,16 +216,27 @@ const RuleConfigurationModalContent: FunctionComponent<RuleConfigurationModalCon
 
                 onSave(rule);
                 onAssociationSaved?.(operationValue, savedAssociationId, rule);
+                dispatch(
+                    addAlert({
+                        description: t(
+                            "approvalWorkflows:notifications.updateRuleConfiguration.success.description"
+                        ),
+                        level: AlertLevels.SUCCESS,
+                        message: t(
+                            "approvalWorkflows:notifications.updateRuleConfiguration.success.message"
+                        )
+                    })
+                );
             })
             .catch(() => {
                 dispatch(
                     addAlert({
                         description: t(
-                            "approvalWorkflows:notifications.updateApprovalWorkflow.genericError.description"
+                            "approvalWorkflows:notifications.updateRuleConfiguration.genericError.description"
                         ),
                         level: AlertLevels.ERROR,
                         message: t(
-                            "approvalWorkflows:notifications.updateApprovalWorkflow.genericError.message"
+                            "approvalWorkflows:notifications.updateRuleConfiguration.genericError.message"
                         )
                     })
                 );
@@ -257,16 +284,27 @@ const RuleConfigurationModalContent: FunctionComponent<RuleConfigurationModalCon
             .then(() => {
                 onSave(null);
                 onAssociationSaved?.(operationValue, associationId, null);
+                dispatch(
+                    addAlert({
+                        description: t(
+                            "approvalWorkflows:notifications.updateRuleConfiguration.success.description"
+                        ),
+                        level: AlertLevels.SUCCESS,
+                        message: t(
+                            "approvalWorkflows:notifications.updateRuleConfiguration.success.message"
+                        )
+                    })
+                );
             })
             .catch(() => {
                 dispatch(
                     addAlert({
                         description: t(
-                            "approvalWorkflows:notifications.updateApprovalWorkflow.genericError.description"
+                            "approvalWorkflows:notifications.updateRuleConfiguration.genericError.description"
                         ),
                         level: AlertLevels.ERROR,
                         message: t(
-                            "approvalWorkflows:notifications.updateApprovalWorkflow.genericError.message"
+                            "approvalWorkflows:notifications.updateRuleConfiguration.genericError.message"
                         )
                     })
                 );

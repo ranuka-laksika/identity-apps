@@ -1,5 +1,17 @@
 # @wso2is/admin.provisioning.v1
 
+## 2.25.209
+
+### Patch Changes
+
+- [#9865](https://github.com/wso2/identity-apps/pull/9865) [`5a62bf34efb3c3ce8037c7aefb8dd2bb514148e6`](https://github.com/wso2/identity-apps/commit/5a62bf34efb3c3ce8037c7aefb8dd2bb514148e6) Thanks [@sadilchamishka](https://github.com/sadilchamishka)! - Update outbound provisioning connector
+
+- Updated dependencies [[`4fafdda888701e42fb3bb19678a5ac5fb7711ff9`](https://github.com/wso2/identity-apps/commit/4fafdda888701e42fb3bb19678a5ac5fb7711ff9), [`51d4c127b2aae10e8dbf5d16800fbd20f562458b`](https://github.com/wso2/identity-apps/commit/51d4c127b2aae10e8dbf5d16800fbd20f562458b)]:
+  - @wso2is/admin.applications.v1@2.41.33
+  - @wso2is/admin.connections.v1@2.36.25
+  - @wso2is/i18n@2.37.9
+  - @wso2is/admin.core.v1@2.55.8
+
 ## 2.25.208
 
 ### Patch Changes

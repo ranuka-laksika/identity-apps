@@ -755,6 +755,24 @@ const UserProfileForm: FunctionComponent<UserProfileFormPropsInterface> = ({
 
                 // For each path, build and push a patch op:
                 attributePaths.forEach((path: string) => {
+                    // pendingEmails must be submitted as [{ type: "value", value: <pendingEmail> }].
+                    // The form stores it as a string[], so extract the first value.
+                    if (path === ProfileConstants.SCIM2_SCHEMA_DICTIONARY.get("PENDING_EMAILS")) {
+                        const pendingEmailValue: string =
+                            (get(values, `${fieldName}.${path}`, []) as string[])?.[0] ?? "";
+
+                        data.Operations.push({
+                            op: "replace",
+                            value: {
+                                [decodedFieldName]: {
+                                    [path]: [ { type: "value", value: pendingEmailValue } ]
+                                }
+                            } as unknown as PatchUserOperationValue
+                        });
+
+                        return;
+                    }
+
                     // Build the fullPath ex: "urn:scim:wso2:schema.country".
                     const fullPath: string = `${fieldName}.${path}`;
                     // Grab the value at that path from the form values.
@@ -820,6 +838,41 @@ const UserProfileForm: FunctionComponent<UserProfileFormPropsInterface> = ({
             });
     };
 
+    /**
+     * Resolves the effective supportedByDefault value for a schema,
+     * giving precedence to the console profile-level override.
+     */
+    const resolveConsoleSupportedByDefault = (targetSchema: ProfileSchemaInterface): boolean => {
+        let value: boolean = targetSchema?.supportedByDefault?.toLowerCase() === "true";
+
+        if (targetSchema?.profiles?.console?.supportedByDefault !== undefined) {
+            value = targetSchema.profiles.console.supportedByDefault;
+        }
+
+        return value;
+    };
+
+    /**
+     * Checks whether a multi-valued attribute (emailAddresses or mobileNumbers) is
+     * supported in the console profile, to decide whether to show it instead of the
+     * corresponding primary attribute (emails or mobile).
+     */
+    const isMultiValuedAttributeSupportedInConsole = (schemaName: string): boolean => {
+        if (!isMultipleEmailsAndMobileNumbersConfigEnabled) {
+            return false;
+        }
+
+        const targetSchema: ProfileSchemaInterface = flattenedProfileSchema.find(
+            (s: ProfileSchemaInterface) => s.name === schemaName
+        );
+
+        if (!targetSchema) {
+            return false;
+        }
+
+        return resolveConsoleSupportedByDefault(targetSchema);
+    };
+
     const isAttributeDisplayable = (schema: ProfileSchemaInterface): boolean => {
 
         if (HIDDEN_SCHEMA_NAMES.includes(schema.name)) {
@@ -832,17 +885,45 @@ const UserProfileForm: FunctionComponent<UserProfileFormPropsInterface> = ({
         }
 
         if (
-            (schema.schemaUri === ProfileConstants.SCIM2_SYSTEM_USER_SCHEMA_ATTRIBUTES.emailAddresses ||
-                schema.schemaUri === ProfileConstants.SCIM2_SYSTEM_USER_SCHEMA_ATTRIBUTES.mobileNumbers) &&
-            !isMultipleEmailAndMobileNumberEnabled
+            schema.schemaUri === ProfileConstants.SCIM2_SYSTEM_USER_SCHEMA_ATTRIBUTES.emailAddresses &&
+            (
+                !isMultipleEmailsAndMobileNumbersConfigEnabled ||
+                !isMultiValuedAttributeSupportedInConsole(
+                    ProfileConstants.SCIM2_SCHEMA_DICTIONARY.get("EMAIL_ADDRESSES")
+                )
+            )
         ) {
             return false;
         }
 
         if (
-            (schema.schemaUri === ProfileConstants.SCIM2_CORE_USER_SCHEMA_ATTRIBUTES.emails ||
-                schema.schemaUri === ProfileConstants.SCIM2_CORE_USER_SCHEMA_ATTRIBUTES.mobile) &&
-            isMultipleEmailAndMobileNumberEnabled
+            schema.schemaUri === ProfileConstants.SCIM2_SYSTEM_USER_SCHEMA_ATTRIBUTES.mobileNumbers &&
+            (
+                !isMultipleEmailsAndMobileNumbersConfigEnabled ||
+                !isMultiValuedAttributeSupportedInConsole(
+                    ProfileConstants.SCIM2_SCHEMA_DICTIONARY.get("MOBILE_NUMBERS")
+                )
+            )
+        ) {
+            return false;
+        }
+
+        // Hide primary emails if emailAddresses is supported in the console profile.
+        if (
+            schema.schemaUri === ProfileConstants.SCIM2_CORE_USER_SCHEMA_ATTRIBUTES.emails &&
+            isMultiValuedAttributeSupportedInConsole(
+                ProfileConstants.SCIM2_SCHEMA_DICTIONARY.get("EMAIL_ADDRESSES")
+            )
+        ) {
+            return false;
+        }
+
+        // Hide primary mobile if mobileNumbers is supported in the console profile.
+        if (
+            schema.schemaUri === ProfileConstants.SCIM2_CORE_USER_SCHEMA_ATTRIBUTES.mobile &&
+            isMultiValuedAttributeSupportedInConsole(
+                ProfileConstants.SCIM2_SCHEMA_DICTIONARY.get("MOBILE_NUMBERS")
+            )
         ) {
             return false;
         }

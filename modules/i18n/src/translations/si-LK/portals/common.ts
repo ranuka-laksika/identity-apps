@@ -139,6 +139,9 @@ export const common: CommonNS = {
             selfRegistration: "ස්වයං ලියාපදිංචිය",
             unassignedUsersDeleted: "පවරා නොමැති පරිශීලකයන් මකා දමා ඇත."
         },
+        search: {
+            placeholder: "ඉල්ලීමේ හැඳුනුම්පතෙන් සොයන්න"
+        },
         subTitle: "අනුමැතිය අවශ්‍ය මෙහෙයුම් කාර්යයන් සමාලෝචනය කරන්න",
         title: "අනුමත කිරීම්"
     },

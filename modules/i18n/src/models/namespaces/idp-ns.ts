@@ -146,6 +146,7 @@ export interface IdpNS {
                     hint: string;
                     placeholder: string;
                 };
+                nonUniqueClaimWarning: string;
                 warning: string;
             };
         };

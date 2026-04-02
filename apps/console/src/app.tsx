@@ -46,6 +46,9 @@ import { commonConfig } from "@wso2is/admin.extensions.v1";
 import { featureGateConfig } from "@wso2is/admin.extensions.v1/configs/feature-gate";
 import useGetAllFeatures from "@wso2is/admin.feature-gate.v1/api/use-get-all-features";
 import { useOnboardingStatus } from "@wso2is/admin.onboarding.v1/hooks/use-onboarding-status";
+import { activateTrial } from "@wso2is/admin.subscription.v1/api/activate-trial";
+import { useTrialStatus } from "@wso2is/admin.subscription.v1/hooks/use-trial-status";
+import { TrialStatus } from "@wso2is/admin.subscription.v1/models/trial";
 import { AGENT_USERSTORE_ID } from "@wso2is/admin.userstores.v1/constants/user-store-constants";
 import useUserStores from "@wso2is/admin.userstores.v1/hooks/use-user-stores";
 import { UserStoreListItem } from "@wso2is/admin.userstores.v1/models/user-stores";
@@ -70,7 +73,7 @@ import dayjs from "dayjs";
 import has from "lodash-es/has";
 import isEmpty from "lodash-es/isEmpty";
 import set from "lodash-es/set";
-import React, { ReactElement, Suspense, useEffect, useMemo, useState } from "react";
+import React, { ReactElement, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 import { Trans } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
@@ -202,6 +205,16 @@ export const App = ({
 
     const { shouldShowOnboarding, isLoading: isOnboardingStatusLoading } = useOnboardingStatus();
 
+    const {
+        trialStatus,
+        isResolved: isTrialResolved,
+        isLoading: isTrialStatusLoading
+    } = useTrialStatus();
+
+    const isTrialActivationEnabled: boolean =
+        (config?.deployment?.extensions as Record<string, Record<string, unknown>>)
+            ?.trial?.enabled === true;
+
     /**
      * Redirect to onboarding page if user should see onboarding.
      */
@@ -227,6 +240,35 @@ export const App = ({
             }
         }
     }, [ shouldShowOnboarding, isOnboardingStatusLoading ]);
+
+    /**
+     * Fire-and-forget trial activation when trial is not yet enabled.
+     */
+    const trialActivationAttempted: React.MutableRefObject<boolean> = useRef<boolean>(false);
+
+    useEffect(() => {
+        if (
+            !isTrialActivationEnabled
+            || isTrialStatusLoading
+            || !isTrialResolved
+            || trialStatus !== TrialStatus.DISABLED
+            || trialActivationAttempted.current
+        ) {
+            return;
+        }
+
+        trialActivationAttempted.current = true;
+
+        activateTrial().catch(() => {
+            // eslint-disable-next-line no-console
+            console.warn("Trial activation is pending.");
+        });
+    }, [
+        isTrialActivationEnabled,
+        isTrialStatusLoading,
+        isTrialResolved,
+        trialStatus
+    ]);
 
     /**
      * Set the deployment configs in redux state.
