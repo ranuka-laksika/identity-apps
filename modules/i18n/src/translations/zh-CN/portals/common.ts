@@ -249,6 +249,7 @@ export const common: CommonNS = {
     "operatingSystem": "操作系统",
     "operationType": "操作类型",
     "operations": "操作",
+    "or": "或",
     "organizationName": "{{orgName}} 组织",
     "overview": "概述",
     "parameter": "参数",

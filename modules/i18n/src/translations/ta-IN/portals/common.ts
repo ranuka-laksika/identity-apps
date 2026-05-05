@@ -250,6 +250,7 @@ export const common: CommonNS = {
     operatingSystem: "இயங்கு தளம்",
     operationType: "செயலாக்க வகை",
     operations: "செயற்பாடுகள்",
+    or: "அல்லது",
     organizationName: "{{orgName}} நிறுவனம்",
     overview: "கண்ணோட்டம்",
     parameter: "பரிமாணம்",

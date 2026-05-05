@@ -172,6 +172,9 @@
         {% if myaccount.force_backup_code is defined %}
         "forceBackupCode": {{ myaccount.force_backup_code }},
         {% endif %}
+        {% if authentication.authenticator.totp.parameters.showSecretKeyInEnrollment is defined %}
+        "showTOTPSecretKeyInEnrollment": {{ authentication.authenticator.totp.parameters.showSecretKeyInEnrollment }},
+        {% endif %}
         {% if myaccount.ui.show_app_switch_button is defined %}
         "showAppSwitchButton": "{{ myaccount.ui.show_app_switch_button }}",
         {% endif %}
