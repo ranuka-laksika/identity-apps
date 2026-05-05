@@ -249,6 +249,7 @@ export const common: CommonNS = {
     "operatingSystem": "Betriebssystem",
     "operationType": "Operationstyp",
     "operations": "Betrieb",
+    "or": "ODER",
     "organizationName": "{{orgName}} Organisation",
     "overview": "Überblick",
     "parameter": "Parameter",

@@ -229,6 +229,7 @@ export interface CommonNS {
     operatingSystem: string;
     operations: string;
     operationType: string;
+    or: string;
     overview: string;
     parameter: string;
     pending: string;

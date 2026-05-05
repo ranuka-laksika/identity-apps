@@ -181,6 +181,10 @@ export interface UIConfigInterface extends CommonUIConfigInterface {
      * If the value is not overridden, the default SCIM2 user schema URI is returned.
      */
     userSchemaURI?: string;
+    /**
+     * Whether to show the TOTP secret key (manual entry) alongside the QR code during enrollment.
+     */
+    showTOTPSecretKeyInEnrollment?: boolean;
 }
 
 /**

@@ -165,6 +165,7 @@ export class Config {
             enableMFAUserWise: window["AppUtils"]?.getConfig()?.ui?.enableMFAUserWise,
             features: window["AppUtils"]?.getConfig()?.ui?.features,
             forceBackupCode: window["AppUtils"]?.getConfig()?.ui?.forceBackupCode,
+            showTOTPSecretKeyInEnrollment: window["AppUtils"]?.getConfig()?.ui?.showTOTPSecretKeyInEnrollment ?? false,
             i18nConfigs: window["AppUtils"]?.getConfig()?.ui?.i18nConfigs,
             isCookieConsentBannerEnabled: window["AppUtils"]?.getConfig()?.ui?.isCookieConsentBannerEnabled,
             isHeaderAvatarLabelAllowed: window["AppUtils"]?.getConfig()?.ui?.isHeaderAvatarLabelAllowed,

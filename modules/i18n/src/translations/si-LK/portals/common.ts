@@ -249,6 +249,7 @@ export const common: CommonNS = {
     operatingSystem: "මෙහෙයුම් පද්ධතිය",
     operationType: "ක්‍රියාකාරී වර්ගය",
     operations: "මෙහෙයුම්",
+    or: "හෝ",
     organizationName: "{{orgName}} සංවිධානය",
     overview: "දළ විශ්ලේෂණය",
     parameter: "පරාමිතිය",
