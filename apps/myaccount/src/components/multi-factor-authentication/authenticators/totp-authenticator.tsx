@@ -578,6 +578,7 @@ export const TOTPAuthenticator: React.FunctionComponent<TOTPProps> = (
                                             <Grid.Row columns={ 1 }>
                                                 <Grid.Column mobile={ 16 } tablet={ 16 } computer={ 16 }>
                                                     <Button
+                                                        size="small"
                                                         type="button"
                                                         onClick={ handleTOTPInitCancel }
                                                         className="link-button totp-verify-action-button"
