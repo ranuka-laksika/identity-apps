@@ -81,6 +81,7 @@ export interface ServiceResourceEndpointsInterface {
     logout: string;
     me: string;
     mfaEnabledAuthenticators: string
+    passwordChange: string;
     preference: string;
     profileSchemas: string;
     push: string;
@@ -176,6 +177,10 @@ export interface UIConfigInterface extends CommonUIConfigInterface {
      * Config to check whether the multiple emails and mobile numbers per user feature is enabled.
      */
     isMultipleEmailsAndMobileNumbersEnabled?: boolean;
+    /**
+     * Whether the basic auth handler is enabled on the server
+     */
+    isBasicAuthHandlerEnabled?: boolean;
     /**
      * Overridden Scim2 user schema URI.
      * If the value is not overridden, the default SCIM2 user schema URI is returned.
