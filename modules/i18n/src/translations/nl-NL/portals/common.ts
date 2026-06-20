@@ -139,9 +139,6 @@ export const common: CommonNS = {
             selfRegistration: "Zelfregistratie",
             unassignedUsersDeleted: "De niet-toegewezen gebruikers zijn verwijderd."
         },
-        search: {
-            placeholder: "Zoeken op verzoek-ID"
-        },
         subTitle: "Beoordeel de operationele taken die uw goedkeuring vereisen",
         title: "Goedkeuringen"
     },
@@ -185,7 +182,6 @@ export const common: CommonNS = {
     createdOn: "Aangemaakt op",
     dangerZone: "Gevarenzone",
     darkMode: "Donkere modus",
-    default: "Standaard",
     delete: "Verwijderen",
     deprecated: "Deze configuratie is verouderd en wordt in een toekomstige versie verwijderd.",
     description: "Beschrijving",
@@ -214,7 +210,6 @@ export const common: CommonNS = {
     goBackHome: "Terug naar startpagina",
     goFullScreen: "Volledig scherm openen",
     good: "Goed",
-    greaterThanOrEqual: "Groter dan of gelijk aan",
     help: "Help",
     hide: "Verbergen",
     hidePassword: "Wachtwoord verbergen",
@@ -228,7 +223,6 @@ export const common: CommonNS = {
     lastSeen: "Laatst gezien",
     lastUpdatedOn: "Laatst bijgewerkt op",
     learnMore: "Meer informatie",
-    lessThanOrEqual: "Kleiner dan of gelijk aan",
     lightMode: "Lichte modus",
     loading: "Laden",
     loginTime: "Aanmeldtijd",
@@ -256,6 +250,7 @@ export const common: CommonNS = {
     operatingSystem: "Besturingssysteem",
     operationType: "Type bewerking",
     operations: "Bewerkingen",
+    or: "OF",
     organizationName: "{{orgName}} organisatie",
     overview: "Overzicht",
     parameter: "Parameter",

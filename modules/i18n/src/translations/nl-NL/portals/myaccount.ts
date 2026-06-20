@@ -433,54 +433,6 @@ export const myAccount: MyAccountNS = {
                 }
             }
         },
-        "policyConsentManagement": {
-            "consentedOnLabel": "Actief vanaf",
-            "dangerZones": {
-                "revoke": {
-                    "actionTitle": "Intrekken",
-                    "header": "Beleidstoestemming intrekken",
-                    "subheader": "Deze actie trekt uw toestemming voor dit beleid in. Mogelijk wordt u gevraagd opnieuw toestemming te geven wanneer u de service de volgende keer gebruikt."
-                }
-            },
-            "modals": {
-                "revokeModal": {
-                    "heading": "Toestemming intrekken voor {{policyName}}",
-                    "message": "Hiermee trekt u uw toestemming voor dit beleid in. Mogelijk wordt u gevraagd opnieuw toestemming te geven wanneer u de service de volgende keer gebruikt. Weet u zeker dat u wilt doorgaan?"
-                }
-            },
-            "notifications": {
-                "fetch": {
-                    "error": {
-                        "description": "Er is een fout opgetreden bij het ophalen van uw beleidstoestemmingen.",
-                        "message": "Ophalen mislukt"
-                    },
-                    "genericError": {
-                        "description": "Er is een fout opgetreden bij het ophalen van uw beleidstoestemmingen.",
-                        "message": "Ophalen mislukt"
-                    },
-                    "success": {
-                        "description": "Uw beleidstoestemmingen zijn succesvol opgehaald.",
-                        "message": "Ophalen geslaagd"
-                    }
-                },
-                "revoke": {
-                    "error": {
-                        "description": "Er is een fout opgetreden bij het intrekken van de beleidstoestemming.",
-                        "message": "Intrekken mislukt"
-                    },
-                    "genericError": {
-                        "description": "Er is een fout opgetreden bij het intrekken van de beleidstoestemming.",
-                        "message": "Intrekken mislukt"
-                    },
-                    "success": {
-                        "description": "De beleidstoestemming is succesvol ingetrokken.",
-                        "message": "Toestemming ingetrokken"
-                    }
-                }
-            },
-            "policyUrlLabel": "Beleid bekijken",
-            "versionLabel": "Versie {{version}}"
-        },
         "cookieConsent": {
             "confirmButton": "Ik begrijp het",
             "content": "We gebruiken cookies om u de best mogelijke algemene ervaring te garanderen. Deze cookies worden gebruikt om een doorlopende sessie te onderhouden en tegelijkertijd vloeiende en gepersonaliseerde diensten te bieden. Voor meer informatie over hoe we cookies gebruiken, raadpleegt u ons <1>Cookiebeleid</1>."
@@ -1314,9 +1266,6 @@ export const myAccount: MyAccountNS = {
                     "content": "Bevestig uw e-mailadres zodat u het aan uw profiel kunt toevoegen",
                     "header": "Bevestiging in afwachting!"
                 },
-                "emailVerification": {
-                    "content": "Dit e-mailadres wordt gebruikt om verificatie-e-mails te verzenden wanneer tweefactorauthenticatie is ingeschakeld en om herstelcodes te verzenden in geval van herstel van een gebruikersnaam/wachtwoord. Om dit e-mailadres bij te werken, moet u het nieuwe e-mailadres verifiëren door de verificatiecode in te voeren die naar uw nieuwe e-mailadres is verzonden. Klik op bijwerken als u wilt doorgaan."
-                },
                 "mobileVerification": {
                     "content": "Dit mobiele nummer wordt gebruikt voor het verzenden van SMS-OTP wanneer tweefactorauthenticatie is ingeschakeld en voor het verzenden van herstelcodes in geval van herstel van een gebruikersnaam/wachtwoord. Om dit nummer bij te werken, moet u het nieuwe nummer verifiëren door de verificatiecode in te voeren die naar uw nieuwe nummer is verzonden. Klik op bijwerken als u wilt doorgaan."
                 }
@@ -1553,67 +1502,6 @@ export const myAccount: MyAccountNS = {
             }
         },
         "verificationOnUpdate": {
-            "modal": {
-                "common": {
-                    "step2": {
-                        "hint": "Heeft u geen code ontvangen?",
-                        "resend": "Opnieuw verzenden",
-                        "resendSuccess": "Het verzoek om de code opnieuw te verzenden is succesvol verzonden",
-                        "validation": {
-                            "otpRequired": "Voer de verificatiecode in"
-                        },
-                        "verificationFailure": "Verificatie mislukt. Probeer het opnieuw."
-                    }
-                },
-                "email": {
-                    "step1": {
-                        "content": {
-                            "label": "Voer uw nieuwe e-mailadres in"
-                        },
-                        "heading": "Verifieer uw e-mailadres",
-                        "validation": {
-                            "invalidFormat": "Voer een geldig e-mailadres in",
-                            "required": "E-mailadres vereist"
-                        }
-                    },
-                    "step2": {
-                        "content": {
-                            "label": "Er is een verificatiecode naar uw e-mailadres verzonden. Voer de onderstaande code in om uw e-mailadres te verifiëren."
-                        },
-                        "heading": "Verifieer uw e-mailadres"
-                    },
-                    "step3": {
-                        "content": "Geslaagd! Uw e-mailadres is succesvol geverifieerd."
-                    }
-                },
-                "notifications": {
-                    "resendError": {
-                        "description": "Er is een fout opgetreden bij het opnieuw verzenden van de verificatiecode",
-                        "message": "Er is een probleem opgetreden"
-                    }
-                },
-                "sms": {
-                    "step1": {
-                        "content": {
-                            "label": "Voer uw nieuwe mobiele nummer in"
-                        },
-                        "heading": "Verifieer uw mobiele nummer",
-                        "validation": {
-                            "invalidFormat": "Voer een geldig mobiel nummer in",
-                            "required": "Mobiel nummer vereist"
-                        }
-                    },
-                    "step2": {
-                        "content": {
-                            "label": "Er is een verificatiecode naar uw mobiele nummer verzonden. Voer de onderstaande code in om uw mobiele nummer te verifiëren."
-                        },
-                        "heading": "Verifieer uw mobiele nummer"
-                    },
-                    "step3": {
-                        "content": "Geslaagd! Uw mobiele nummer is succesvol geverifieerd."
-                    }
-                }
-            },
             "preference": {
                 "notifications": {
                     "error": {
@@ -1692,10 +1580,6 @@ export const myAccount: MyAccountNS = {
         "applications": {
             "subTitle": "Ontdek en open uw toepassingen",
             "title": "Toepassingen"
-        },
-        "consents": {
-            "subTitle": "Beheer de toestemmingen die u heeft gegeven voor toepassingen en geaccepteerde beleidsregels",
-            "title": "Toestemmingen"
         },
         "overview": {
             "subTitle": "Beheer uw persoonlijke gegevens, accountbeveiliging en privacy-instellingen",
@@ -1794,15 +1678,6 @@ export const myAccount: MyAccountNS = {
             "placeholders": {
                 "emptyConsentList": {
                     "heading": "U heeft geen toestemmingen gegeven"
-                }
-            }
-        },
-        "policyConsentManagement": {
-            "description": "Bekijk de beleidsregels die u heeft geaccepteerd.",
-            "heading": "Beleidstoestemmingen",
-            "placeholders": {
-                "emptyConsentList": {
-                    "heading": "U heeft geen beleidstoestemmingen geaccepteerd"
                 }
             }
         },
