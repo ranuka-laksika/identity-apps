@@ -308,7 +308,7 @@ module.exports = (config: WebpackOptionsNormalized, context: NxWebpackContextInt
         /* eslint-disable max-len */
         config.plugins.push(
             (new HtmlWebpackPlugin({
-                authenticatedIdPs: "<%=request.getParameter(\"AuthenticatedIdPs\")%>",
+                authenticatedIdPs: "<%=Encode.forHtml(request.getParameter(\"AuthenticatedIdPs\"))%>",
                 authorizationCode: "<%=Encode.forHtml(request.getParameter(\"code\"))%>",
                 basename: DeploymentConfig.appBaseName,
                 clientID: DeploymentConfig.clientID,
