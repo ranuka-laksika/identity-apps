@@ -185,7 +185,7 @@ export const ChangePassword: FunctionComponent<ChangePasswordProps> = (props: Ch
 
         updatePassword(currentPassword, newPassword, isSubOrgUser, userOrganizationHandle)
             .then((response: any) => {
-                if (response.status && response.status === 200) {
+                if (response.status && (response.status === 200 || response.status === 204)) {
                     // reset the form.
                     resetForm();
                     // hide the change password form

@@ -160,6 +160,9 @@
         "appLogoPath": "{{ myaccount.ui.app_logo_path }}",
         "appMobileLogoPath": "{{ myaccount.ui.app_mobile_logo_path }}",
         "appWhiteLogoPath": "{{ myaccount.ui.app_white_logo_path }}",
+        {% if authentication.enable_basic_auth_handler is defined %}
+        "isBasicAuthHandlerEnabled": {{ authentication.enable_basic_auth_handler }},
+        {% endif %}
         {% if myaccount.disable_mfa_for_super_tenant_user is defined %}
         "disableMFAforSuperTenantUser": "{{ myaccount.disable_mfa_for_super_tenant_user }}",
         {% endif %}
