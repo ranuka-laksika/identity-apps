@@ -242,26 +242,13 @@ export const applicationConfig: ApplicationConfig = {
             if (
                 apiResourceFeatureEnabled && !application?.advancedConfigurations?.fragment &&
                 (
-                    (isUnifiedMcpCapabilitiesEnabled && (
-                        isMCPClientApp ||
-                        application?.templateId === ApplicationManagementConstants.CUSTOM_APPLICATION_OIDC
-                        || application?.templateId === MobileAppTemplate?.id
-                        || application?.templateId === OIDCWebAppTemplate?.id
-                        || application?.templateId === SinglePageAppTemplate?.id
-                        || application?.templateId === ApplicationManagementConstants.M2M_APP_TEMPLATE_ID
-                        || application?.templateId === ApplicationTemplateIdTypes.DIGITAL_WALLET_APPLICATION
-                        || application?.templateId === ApplicationTemplateIdTypes.AGENT_APPLICATION
-                    )) ||
-                    (!isUnifiedMcpCapabilitiesEnabled && (
-                        isMCPClientApp ||
-                        application?.templateId === ApplicationManagementConstants.CUSTOM_APPLICATION_OIDC
-                        || application?.templateId === MobileAppTemplate?.id
-                        || application?.templateId === OIDCWebAppTemplate?.id
-                        || application?.templateId === SinglePageAppTemplate?.id
-                        || application?.templateId === ApplicationManagementConstants.M2M_APP_TEMPLATE_ID
-                        || application?.templateId === ApplicationTemplateIdTypes.DIGITAL_WALLET_APPLICATION
-                        || application?.templateId === ApplicationTemplateIdTypes.AGENT_APPLICATION
-                    ))
+                    application?.templateId === ApplicationManagementConstants.CUSTOM_APPLICATION_OIDC
+                    || application?.templateId === MobileAppTemplate?.id
+                    || application?.templateId === OIDCWebAppTemplate?.id
+                    || application?.templateId === SinglePageAppTemplate?.id
+                    || application?.templateId === ApplicationManagementConstants.M2M_APP_TEMPLATE_ID
+                    || application?.templateId === ApplicationTemplateIdTypes.DIGITAL_WALLET_APPLICATION
+                    || application?.templateId === ApplicationTemplateIdTypes.AGENT_APPLICATION
                 )
                 && application.name !== ApplicationManagementConstants.MY_ACCOUNT_APP_NAME
             ) {
