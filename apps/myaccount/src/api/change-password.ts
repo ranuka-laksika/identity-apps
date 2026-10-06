@@ -37,9 +37,9 @@ const httpClient: HttpInstance = AsgardeoSPAClient.getInstance().httpRequest.bin
  * (`[authentication] enable_basic_auth_handler` in deployment.toml), surfaced to the SPA as
  * `ui.isBasicAuthHandlerEnabled`:
  *
- * - When the basic auth handler is ENABLED (default) the legacy SCIM2 `/Me` flow is used
+ * - When the basic auth handler is ENABLED (default) the legacy SCIM2 `/Me` flow is used.
  * - When the basic auth handler is DISABLED, password update is routed through the dedicated password change REST API
- *   (`POST /api/users/v1/me/change-password`)
+ *   (`POST /api/users/v1/me/change-password`).
  *
  * @param currentPassword - currently registered password.
  * @param newPassword - newly assigned password.
