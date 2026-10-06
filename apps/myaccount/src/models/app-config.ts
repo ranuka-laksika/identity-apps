@@ -178,7 +178,7 @@ export interface UIConfigInterface extends CommonUIConfigInterface {
      */
     isMultipleEmailsAndMobileNumbersEnabled?: boolean;
     /**
-     * Whether the basic auth handler is enabled on the server
+     * Whether the basic auth handler is enabled on the server.
      */
     isBasicAuthHandlerEnabled?: boolean;
     /**
